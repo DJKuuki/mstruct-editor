@@ -828,7 +828,7 @@ if (!isHostedViewer) {
     afterNew: () => { timelineEditorUi?.setFiles([]); desktopWorkspace?.newDocument(); },
     afterIo: result => { parentDocumentName = String(result?.name || parentDocumentName); },
     afterOpen: () => desktopWorkspace?.opened(normalizeMetadata(metadata).mstructtimeFiles),
-    afterSave: () => desktopWorkspace?.saved(normalizeMetadata(metadata).mstructtimeFiles),
+    afterSave: () => desktopWorkspace?.saved(),
     setStatus: setHostStatus,
     tr,
   });

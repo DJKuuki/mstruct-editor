@@ -76,6 +76,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
   let committedOffset = 0;
   let timelineEditing = false;
   let stableTempo = false;
+  let audioTimeline = "";
   let navLocked = true;
   let navRevealed = true;
   let shortcuts = readRendererShortcuts();
@@ -383,6 +384,10 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       const fallback = items.length ? items[0].fileName : "";
       timeline.value = items.some((item) => item.fileName === selectedFileName) ? selectedFileName : fallback;
       reflectTimelineVisibility();
+      if (audioTimeline !== timeline.value) {
+        audioTimeline = timeline.value;
+        onTimelineAudioChange?.();
+      }
     },
     getSelectedTimeline: () => timeline.value,
     setTimelineDocument(value) {
@@ -390,7 +395,6 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       offset.value = "0";
       playback.setTemporaryOffset(0);
       playback.setTimelineDocument(value);
-      onTimelineAudioChange?.();
     },
     refreshTimelineDocument(value) {
       playback.refreshTimelineDocument(value);

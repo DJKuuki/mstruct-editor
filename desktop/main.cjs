@@ -9,7 +9,7 @@ const { setupUserDataIpc } = require("./user-data-ipc.cjs");
 const { createRecentDocuments } = require("./recent-documents.cjs");
 const { setupLibraryIpc } = require("./library-ipc.cjs");
 const { setupDesktopAudio } = require("./library-audio.cjs");
-const { createDesktopLocale, applicationMenuTemplate, TECHNICAL_DOCUMENTATION_URL } = require("./application-ui.cjs");
+const { createDesktopLocale, applicationMenuTemplate, openCurrentDocumentDirectory, TECHNICAL_DOCUMENTATION_URL } = require("./application-ui.cjs");
 const { createApplicationMenu } = require("./application-menu.cjs");
 const { createDocumentTransition } = require("./document-transition.cjs");
 const desktopLocale = createDesktopLocale();
@@ -747,7 +747,8 @@ function showAbout() {
 }
 
 const applicationMenu = createApplicationMenu({ Menu, ipcMain, assertTrustedSender, getWindow: () => mainWindow, quit: () => app.quit(),
-  createTemplate: () => applicationMenuTemplate({ tr: nativeTr, sendDocumentCommand, showThirdPartyNotices, showAbout, hasDocument: documentActive,
+  createTemplate: () => applicationMenuTemplate({ tr: nativeTr, sendDocumentCommand, showThirdPartyNotices, showAbout, hasDocument: documentActive, hasDocumentPath: Boolean(currentDocumentPath),
+    openCurrentDirectory: () => { void openCurrentDocumentDirectory({ filePath: currentDocumentPath, shell, dialog, tr: nativeTr }); },
     openTechnicalDocumentation: () => { void shell.openExternal(TECHNICAL_DOCUMENTATION_URL).catch(error => console.error(error)); },
     recentDocuments: recentDocuments.list(),
     clearRecentDocuments: () => updateRecentDocuments(() => { recentDocuments.clear(); app.clearRecentDocuments(); }),

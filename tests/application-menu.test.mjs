@@ -4,7 +4,7 @@ import applicationUi from "../desktop/application-ui.cjs";
 import applicationMenuModule from "../desktop/application-menu.cjs";
 
 function fixture() {
-  let active = false, builds = 0, installed = 0, quit = 0;
+  let active = false, hasPath = false, builds = 0, installed = 0, quit = 0;
   const handlers = new Map(), commands = [], roles = [], changes = [], locale = applicationUi.createDesktopLocale("zh");
   const contents = { send: (channel, model) => changes.push({ channel, model }), getZoomLevel: () => 1, setZoomLevel: level => roles.push(["zoom", level]) };
   for (const role of ["undo", "redo", "cut", "copy", "paste", "selectAll"]) contents[role] = () => roles.push(role);
@@ -12,9 +12,9 @@ function fixture() {
   const controller = applicationMenuModule.createApplicationMenu({
     Menu: { buildFromTemplate(template) { builds++; return template; }, setApplicationMenu() { installed++; } },
     ipcMain: { handle: (channel, action) => handlers.set(channel, action) }, assertTrustedSender: event => { if (!event?.trusted) throw Error("Untrusted sender"); },
-    getWindow: () => window, quit: () => quit++, createTemplate: () => applicationUi.applicationMenuTemplate({ tr: locale.tr, hasDocument: active, sendDocumentCommand: command => commands.push(command), showAbout: () => commands.push("about"), openTechnicalDocumentation: () => commands.push(applicationUi.TECHNICAL_DOCUMENTATION_URL) }),
+    getWindow: () => window, quit: () => quit++, createTemplate: () => applicationUi.applicationMenuTemplate({ tr: locale.tr, hasDocument: active, hasDocumentPath: hasPath, openCurrentDirectory: () => commands.push("folder"), sendDocumentCommand: command => commands.push(command), showAbout: () => commands.push("about"), openTechnicalDocumentation: () => commands.push(applicationUi.TECHNICAL_DOCUMENTATION_URL) }),
   });
-  return { controller, commands, roles, changes, handlers, locale, active(value) { active = value; controller.refresh(); }, counts: () => ({ builds, installed, quit }) };
+  return { controller, commands, roles, changes, handlers, locale, active(value, saved = false) { active = value; hasPath = saved; controller.refresh(); }, counts: () => ({ builds, installed, quit }) };
 }
 test("empty library disables document/edit actions, while opening a document enables them and editor settings", () => {
   const f = fixture(); f.controller.refresh();
@@ -75,4 +75,37 @@ test("Return to Local Library appears only in an editor; documentation is availa
   assert.equal(applicationUi.TECHNICAL_DOCUMENTATION_URL, "https://doi.org/10.5281/zenodo.23637500");
   assert.equal(f.commands.filter(command => command === "return-library").length, 2);
   assert.equal(f.commands.filter(command => command === applicationUi.TECHNICAL_DOCUMENTATION_URL).length, 4);
+});
+
+test("current folder is isolated above Return and disabled until saved", () => {
+  const f = fixture(); f.controller.refresh();
+  const file = () => f.controller.snapshot().menus.find(menu => menu.id === "file").submenu;
+  assert.equal(f.controller.invoke("open-current-directory"), false);
+  f.active(true); assert.equal(f.controller.invoke("open-current-directory"), false);
+  for (const locale of ["zh", "en"]) {
+    f.locale.set(locale); f.active(true, true);
+    const items = file(), index = items.findIndex(item => item.id === "open-current-directory");
+    assert.equal(items[index - 1].type, "separator");
+    assert.equal(items[index + 1].type, "separator");
+    assert.equal(items[index + 2].id, "return-library");
+    assert.equal(items[index].label, locale === "zh" ? "在浏览器中打开当前文件夹" : "Open Current Folder in File Explorer");
+    assert.throws(() => f.handlers.get("mstruct:menu-action")({}, "open-current-directory"), /Untrusted/);
+    assert.equal(f.controller.invoke("open-current-directory"), true);
+  }
+  assert.deepEqual(f.commands, ["folder", "folder"]);
+  f.active(false); assert.equal(f.controller.invoke("open-current-directory"), false);
+});
+
+test("open folder resolves the native document path and reports native failures", async () => {
+  const path = await import("node:path"), opened = [], errors = [];
+  const args = { shell: { openPath: async value => { opened.push(value); return ""; } }, dialog: { showErrorBox: (...values) => errors.push(values) }, tr: applicationUi.createDesktopLocale("en").tr };
+  await applicationUi.openCurrentDocumentDirectory({ ...args, filePath: null });
+  const filePath = path.resolve("test library", "Analysis.mstruct");
+  await applicationUi.openCurrentDocumentDirectory({ ...args, filePath });
+  assert.deepEqual(opened, [path.dirname(filePath)]);
+  args.shell.openPath = async () => "Folder unavailable";
+  await applicationUi.openCurrentDocumentDirectory({ ...args, filePath });
+  args.shell.openPath = async () => { throw Error("Access denied"); };
+  await applicationUi.openCurrentDocumentDirectory({ ...args, filePath });
+  assert.deepEqual(errors, [["Could Not Open Current Folder", "Folder unavailable"], ["Could Not Open Current Folder", "Access denied"]]);
 });

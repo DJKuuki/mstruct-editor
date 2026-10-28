@@ -3,6 +3,7 @@ const copy = {
   zh: {
     title: "分析编辑器", file: "文件", new: "新建", open: "打开…", save: "保存", saveAs: "另存为…", export: "导出", quit: "退出",
     recent: "最近编辑的文件", noRecent: "暂无最近文件", clearRecent: "清空最近文件记录",
+    openCurrentDirectory: "在浏览器中打开当前文件夹", openDirectoryFailed: "无法打开当前文件夹",
     returnLibrary: "返回本地曲库", technicalDocumentation: "技术文档",
     recentUnavailable: "无法打开最近文件", recentUnavailableDetail: "无法读取“{name}”。文件可能已被移动、删除或无法访问。",
     recentStorage: "无法保存最近文件记录", recentStorageDetail: "请确认本机用户数据目录可写。当前文档的打开或保存结果不受影响。",
@@ -24,6 +25,7 @@ const copy = {
   en: {
     title: "Analysis Editor", file: "File", new: "New", open: "Open…", save: "Save", saveAs: "Save As…", export: "Export", quit: "Quit",
     recent: "Recent Files", noRecent: "No Recent Files", clearRecent: "Clear Recent Files",
+    openCurrentDirectory: "Open Current Folder in File Explorer", openDirectoryFailed: "Could Not Open Current Folder",
     returnLibrary: "Back to Local Library", technicalDocumentation: "Technical Documentation",
     recentUnavailable: "Recent File Unavailable", recentUnavailableDetail: "Could not read “{name}”. The file may have been moved, deleted, or become inaccessible.",
     recentStorage: "Could Not Save Recent Files", recentStorageDetail: "Check that the local user data folder is writable. The document was still opened or saved successfully.",
@@ -53,7 +55,17 @@ function createDesktopLocale(initial = "zh") {
   };
 }
 
-function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotices, showAbout, openTechnicalDocumentation, recentDocuments = [], clearRecentDocuments, hasDocument = false }) {
+async function openCurrentDocumentDirectory({ filePath, shell, dialog, tr }) {
+  if (!filePath) return;
+  try {
+    const error = await shell.openPath(require("node:path").dirname(filePath));
+    if (error) throw new Error(error);
+  } catch (error) {
+    dialog.showErrorBox(tr("openDirectoryFailed"), String(error.message || error));
+  }
+}
+
+function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotices, showAbout, openTechnicalDocumentation, openCurrentDirectory, recentDocuments = [], clearRecentDocuments, hasDocument = false, hasDocumentPath = false }) {
   const command = (key, action, accelerator, enabled = true) => ({ id: action, label: tr(key), enabled, ...(accelerator ? { accelerator } : {}), click: () => sendDocumentCommand(action) });
   // Explicit Windows shortcuts also travel with the themed menu model.
   const accelerators = { undo: "CmdOrCtrl+Z", redo: "Ctrl+Y", cut: "CmdOrCtrl+X", copy: "CmdOrCtrl+C", paste: "CmdOrCtrl+V", selectAll: "CmdOrCtrl+A",
@@ -73,7 +85,7 @@ function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotice
   return [
     { id: "file", label: tr("file"), submenu: [command("new", "new", "CmdOrCtrl+N", hasDocument), separator(), command("open", "open", "CmdOrCtrl+O"), recent, command("save", "save", "CmdOrCtrl+S", hasDocument), command("saveAs", "save-as", "CmdOrCtrl+Shift+S", hasDocument), separator(),
       { id: "export", label: tr("export"), enabled: hasDocument, submenu: ["pdf", "svg", "png", "jpg"].map(format => ({ id: `export:${format}`, enabled: hasDocument, label: `${format.toUpperCase()}…`, click: () => sendDocumentCommand(`export:${format}`) })) }, separator(),
-      ...(hasDocument ? [command("returnLibrary", "return-library"), separator()] : []), role("quit")] },
+      ...(hasDocument ? [{ id: "open-current-directory", label: tr("openCurrentDirectory"), enabled: hasDocumentPath, click: openCurrentDirectory }, separator(), command("returnLibrary", "return-library"), separator()] : []), role("quit")] },
     { id: "edit", label: tr("edit"), submenu: [role("undo", "undo", hasDocument), role("redo", "redo", hasDocument), separator(), role("cut", "cut", hasDocument), role("copy", "copy", hasDocument), role("paste", "paste", hasDocument), role("selectAll", "selectAll", hasDocument)] },
     { id: "view", label: tr("view"), submenu: [role("fullscreen", "togglefullscreen"), separator(), role("resetZoom"), role("zoomIn"), role("zoomOut")] },
     { id: "settings", label: tr("settings"), submenu: [command("applicationSettings", "application-settings"), command("editorSettings", "editor-settings", undefined, hasDocument)] },
@@ -81,4 +93,4 @@ function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotice
   ];
 }
 
-module.exports = { createDesktopLocale, applicationMenuTemplate, TECHNICAL_DOCUMENTATION_URL };
+module.exports = { createDesktopLocale, applicationMenuTemplate, openCurrentDocumentDirectory, TECHNICAL_DOCUMENTATION_URL };

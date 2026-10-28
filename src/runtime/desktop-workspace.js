@@ -17,8 +17,8 @@ export function setupDesktopWorkspace({ api, profiles, locale, session, renderer
     get browsing() { return library.visible; },
     start: () => library.start(), refreshLocale: () => library.refreshLocale(),
     newDocument() { audio.clear(); library.opened(); },
-    async opened(fileNames) { await timelines(fileNames); library.opened(); await audio.refresh(); },
-    async saved(fileNames) { await timelines(fileNames); await library.saved(); await audio.refresh(); },
+    async opened(fileNames) { audio.clear(); await timelines(fileNames); library.opened(); await audio.refresh(); },
+    saved: () => library.saved(),
     refreshAudio: () => audio.refresh(), chooseAudio: () => audio.choose(),
   };
 }
