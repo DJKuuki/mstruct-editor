@@ -1,0 +1,22 @@
+/* Only the portable application shell changes color. Existing editor/score rules are untouched. */
+.editor-app[data-app-color-scheme] { background: var(--paper); }
+.editor-app[data-app-color-scheme] > .editor-header { color: var(--ink); background: var(--paper); border-color: var(--line); }
+.editor-app[data-app-color-scheme] > .workspace {
+  --ink: #19221f; --muted: #718079; --line: #dfe7e1; --paper: #f7f9f5;
+  --card: #ffffff; --accent: #c8f36d; --deep: #283b36; --soft: #e9f0e9;
+}
+.editor-app[data-app-color-scheme] > .editor-header .metadata-button { color: var(--ui-text); border-color: var(--ui-border); background: var(--card); }
+.editor-app[data-app-color-scheme] > .editor-header .metadata-button:hover { background: var(--ui-hover); }
+.editor-app[data-app-color-scheme] > .editor-header .render-button { background: var(--deep); }
+.editor-app[data-app-color-scheme] > .editor-header .render-button:hover { background: var(--ui-button-hover); }
+.editor-app[data-app-color-scheme] > .editor-header .editor-tool-menu,
+.editor-app[data-app-color-scheme] > .editor-header .standalone-language-menu { border-color: var(--ui-border); background: var(--card); }
+.editor-app[data-app-color-scheme] > .editor-header .editor-tool-menu button,
+.editor-app[data-app-color-scheme] > .editor-header .standalone-language-menu button { color: var(--ui-text); }
+.editor-app[data-app-color-scheme] > .editor-header .editor-tool-menu button:hover,
+.editor-app[data-app-color-scheme] > .editor-header .standalone-language-menu button:hover { background: var(--ui-hover); }
+.editor-app[data-desktop-shell] #newButton, .editor-app[data-desktop-shell] #importButton, .editor-app[data-desktop-shell] #exportButton,
+.editor-app[data-desktop-shell] #applicationSettingsButton { display: none; }
+.desktop-brand { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
+.editor-app[data-desktop-shell] > .editor-header { gap: 18px; }
+.is-timeline-editor .editor-app[data-desktop-shell] #renderButton, .library-open .editor-app[data-desktop-shell] #renderButton { display: none; }

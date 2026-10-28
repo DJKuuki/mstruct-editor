@@ -1,0 +1,11 @@
+token,adds_seventh,inversion,operation,render_upper,render_lower
+6,,1,,6,
+64,,2,,6,4
+7,True,,,7,
+65,True,1,,6,5
+43,True,2,,4,3
+42,True,3,,4,2
+7b5,True,,flatten_fifth,7,b5
+sus,,,remove_third,sus,
+7sus,True,,suspended_seventh,7sus,
+7b5sus,True,,suspended_seventh_flat_fifth,7sus,b5

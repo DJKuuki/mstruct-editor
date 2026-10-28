@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Desktop UI verification</title></head><body>
+<div id="fixtureControls"><button id="fixtureChinese">中文</button><button id="fixtureEnglish">English</button><button id="fixtureBlue">Ink blue</button><button id="fixtureGreen">Green</button><button id="fixtureTerracotta">Terracotta</button><button id="fixtureSettings">Settings</button><button id="fixtureDocument">Open / close document</button><button id="fixtureEntries">Source states</button><button id="fixtureConflict">Conflicts</button><output id="fixtureResult"></output></div>
+<main class="editor-app" data-desktop-shell="true" data-app-color-scheme="ink-blue"><header class="editor-header"><div id="editorToolSwitcher"><h1>Analysis Editor</h1></div><div class="header-actions"><button id="applicationSettingsButton">Settings</button><button id="renderButton">Render</button></div></header><section class="workspace"></section></main>
+<script type="module">
+import "../src/style.css";
+import "../src/runtime/desktop-appearance.css";
+import "../src/ui/application-colors.css";
+import "../src/ui/application-settings.css";
+import { createLibraryBrowser } from "../src/ui/library-browser.js";
+import { createDesktopMenu } from "../src/ui/desktop-menu.js";
+import { createApplicationSettings } from "../src/ui/application-settings.js";
+import { tr, getInterfaceLocale, setInterfaceLocale } from "../src/editor-i18n.js";
+import { normalizeRendererPreferences, RENDERER_PREFERENCES_STORAGE_KEY } from "../src/core/renderer-preferences.js";
+const shell = document.querySelector(".editor-app"), result = document.querySelector("#fixtureResult");
+let color = "ink-blue";
+const ui = createLibraryBrowser({ locale: getInterfaceLocale, actions: { home() { ui.show(); }, navigate(folder) { result.textContent = folder; }, open(entry) { result.textContent = entry.path; }, search() {}, choose() {}, scan() {}, rebuild() {}, folder() {}, analysis() {}, status() {} } });
+const read = () => normalizeRendererPreferences(JSON.parse(localStorage.getItem(RENDERER_PREFERENCES_STORAGE_KEY) ?? "null"));
+const settings = createApplicationSettings({ button: document.querySelector("#fixtureSettings"), tr, getColorScheme: () => color, setColorScheme(value) { color = value; shell.dataset.appColorScheme = value; },
+  userData: { async open() { result.textContent = "open-user-data"; }, async clear() { result.textContent = "clear-user-data-request"; return { cancelled: true }; } },
+  rules: { state: async () => ({ url: "https://fixture.invalid/rules" }) }, openRules() {}, errorMessage: error => error.message,
+  getPlaybackOffset: () => read().globalPlaybackOffset, setPlaybackOffset(value) { localStorage.setItem(RENDERER_PREFERENCES_STORAGE_KEY, JSON.stringify({ ...read(), globalPlaybackOffset: value })); result.textContent = String(value); } });
+let menuRevision = 1, menuReads = 0, menuActions = 0, active = false, menuListener;
+const menuModel = () => ({ revision: menuRevision, menus: [
+  { id: "file", label: getInterfaceLocale() === "en" ? "File" : "文件", submenu: [{ id: "new", label: "New", accelerator: "CmdOrCtrl+N", enabled: active }, { id: "open", label: "Open", accelerator: "CmdOrCtrl+O", enabled: true }, { id: "save", label: "Save", accelerator: "CmdOrCtrl+S", enabled: active }, ...(active ? [{ id: "return-library", label: getInterfaceLocale() === "en" ? "Back to Local Library" : "返回本地曲库", enabled: true }] : [])] },
+  { id: "edit", label: getInterfaceLocale() === "en" ? "Edit" : "编辑", submenu: [{ id: "role:undo", label: "Undo", accelerator: "CmdOrCtrl+Z", enabled: active }, { id: "role:copy", label: "Copy", accelerator: "CmdOrCtrl+C", enabled: active }] },
+  { id: "view", label: getInterfaceLocale() === "en" ? "View" : "视图", submenu: [{ id: "role:zoomIn", label: "Zoom In", accelerator: "CmdOrCtrl+Plus", enabled: true }, { id: "role:zoomOut", label: "Zoom Out", accelerator: "CmdOrCtrl+-", enabled: true }] },
+  { id: "settings", label: getInterfaceLocale() === "en" ? "Settings" : "设置", submenu: [{ id: "application-settings", label: "Application Settings", enabled: true }, { id: "editor-settings", label: "Editor Settings", enabled: active }] },
+  { id: "help", label: getInterfaceLocale() === "en" ? "Help" : "帮助", submenu: [{ id: "help:documentation", label: getInterfaceLocale() === "en" ? "Technical Documentation" : "技术文档", enabled: true }] },
+] });
+createDesktopMenu({ label: () => tr("desktopMenuBar"), api: { menuState: async () => { document.querySelector("#fixtureControls").dataset.menuReads = String(++menuReads); return menuModel(); }, onMenuChanged(callback) { menuListener = callback; return () => {}; }, async menuAction(id) { document.querySelector("#fixtureControls").dataset.menuActions = String(++menuActions); result.textContent = id; if (id === "application-settings") await settings.open(); } } });
+document.querySelector("#fixtureDocument").onclick = () => { active = !active; menuRevision++; menuListener(menuModel()); };
+document.querySelector("#fixtureEntries").onclick = () => ui.update({ folder: "ms10001 - Sample", folders: [], entries: ["hidden", "revision_required", "deleted", "unavailable", "available", "local"].map((status, i) => ({ path: `ms10001 - Sample/Analysis ${i + 1}.mstruct`, hash: "baseline", metadata: { versionName: `Analysis ${i + 1}`, songName: "Sample", composers: [], creator: "Sample analyst" }, origin: status === "local" ? undefined : { status, baseline: "baseline" } })) });
+document.querySelector("#fixtureConflict").onclick = async () => {
+  const localText = "[MAIN]\n{BN:1}{TS:4/4}{D:1}{TC:C}\nC|I;\nDm|ii;\nG|V;\nC|I;\n{COMMENT:<script>alert(1)<\/script>}\n[/MAIN]";
+  const remoteText = "[MAIN]\n{BN:1}{TS:4/4}{D:1}{TC:C}\nC|I;\nF|IV;\nG|V;\nAm|vi;\nC|I;\n{COMMENT:<script>alert(2)<\/script>}\n[/MAIN]";
+  result.textContent = JSON.stringify(await ui.importPlan({ generatedAt: "2026-10-28T05:00:00Z", sha256: "fixture", records: [
+    { songId: "ms10001", localPath: "Sample/Analysis.mstruct", conflict: true, localHash: "local", localText, remoteText },
+    { songId: "ms10001", localPath: "Sample/timeline.mstructtime", conflict: true, localHash: null, localText: "", remoteText: "[TIMELINE]\n1: 0\n2: 2.5\n[/TIMELINE]" },
+  ] }));
+};
+for (const [id, locale] of [["fixtureChinese", "zh"], ["fixtureEnglish", "en"]]) document.querySelector(`#${id}`).onclick = () => { setInterfaceLocale(locale); ui.refreshLocale(); settings.refreshLocale(); menuRevision++; menuListener(menuModel()); };
+for (const [id, value] of [["fixtureBlue", "ink-blue"], ["fixtureGreen", "green"], ["fixtureTerracotta", "terracotta"]]) document.querySelector(`#${id}`).onclick = () => { color = value; shell.dataset.appColorScheme = value; };
+ui.update({ root: "UI test fixture", folder: "", folders: Array.from({ length: 40 }, (_, i) => `Folder ${String(i + 1).padStart(2, "0")}`), entries: [], snapshot: { generatedAt: "2026-10-27T13:24:46Z", checkedAt: "2026-10-27T15:20:00Z" } }); ui.show();
+</script>
+<style>body{overflow:auto;padding:12px}#fixtureControls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.editor-app{width:min(960px,100%);height:640px;padding:0 18px 18px}.desktop-menu-bar{margin-inline:-18px}.editor-header{min-height:60px}.library-browser:focus-visible{outline:2px solid var(--deep);outline-offset:-2px}</style>
+</body></html>

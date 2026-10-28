@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Hosted runtime verification</title></head><body>
+<p id="status">Loading editor and viewer</p><iframe id="editor" title="Hosted editor" style="width:100%;height:340px;border:1px solid #ccc"></iframe><iframe id="viewer" title="Hosted viewer" style="width:100%;height:220px;border:1px solid #ccc"></iframe>
+<script type="module">
+import profile from "../src/config/official-profile.json";
+import { createEmptyMetadata } from "../src/core/mstruct-document.js";
+const states = {}, metadata = { ...createEmptyMetadata(), versionName: "Runtime test", songName: "Runtime test", isStableTempo: true,
+  mstructFormatVersion: "1", mstructProfileId: profile.manifest.profileId, mstructProfileHash: profile.manifest.bundleHash };
+window.addEventListener("message", event => {
+  if (event.origin !== location.origin || event.data?.source !== "mstruct-editor") return;
+  const mode = ["editor", "viewer"].find(id => document.getElementById(id).contentWindow === event.source);
+  if (event.data.type === "profile-status") states[mode] = event.data.ok;
+  document.querySelector("#status").textContent = JSON.stringify(states);
+});
+for (const id of ["editor", "viewer"]) {
+  const frame = document.getElementById(id);
+  frame.onload = () => frame.contentWindow.postMessage({ source: "music-theory-db", type: "mstruct-profile", token: "fixture", profile,
+    metadata, main: "{BN:1}{TS:4/4}{D:1}{BPM:1/4=120}{TC:C}C|I;", comments: [], locale: "en", technique: "C|I" }, location.origin);
+  frame.src = `/index.html?hosted=1&mode=${id}&token=fixture`;
+}
+</script></body></html>

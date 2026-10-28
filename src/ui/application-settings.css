@@ -1,0 +1,21 @@
+.application-settings-dialog { width: min(480px, calc(100% - 40px)); max-height: calc(100dvh - 40px); padding: 0; overflow: auto; border: 1px solid var(--ui-border); border-radius: 8px; background: var(--card); color: var(--ink); box-shadow: 0 28px 80px rgba(var(--ui-shadow-rgb), .28); }
+.application-settings-dialog::backdrop { background: rgba(var(--ui-shadow-rgb), .35); backdrop-filter: blur(2px); }
+.application-settings-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 26px; }
+.application-settings-dialog h2 { margin: 0; font-size: 22px; font-weight: 500; }
+.application-settings-close { border: 0; background: transparent; color: var(--muted); font-size: 26px; }
+.application-settings-content { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 0 26px 24px; font-size: 14px; }
+.application-settings-content select { min-width: 130px; padding: 9px 12px; border: 1px solid var(--ui-border); border-radius: 5px; background: var(--card); color: var(--ink); font: inherit; }
+.application-settings-content p { grid-column: 1 / -1; margin: 0; color: var(--muted); line-height: 1.6; }
+.application-settings-content .application-settings-status[data-error="true"] { color: #9b3a2e; }
+.application-rules-label, #application-rules-url, .application-rules-actions { grid-column: 1 / -1; }
+#application-rules-url { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--ui-border); border-radius: 5px; background: var(--card); color: var(--ink); font: inherit; }
+.application-rules-actions, .application-data-actions { display: flex; flex-wrap: wrap; gap: 10px; grid-column: 1 / -1; }
+.application-data-actions[hidden] { display: none; }
+.application-rules-actions button, .application-data-actions button { padding: 8px 12px; border: 1px solid var(--ui-border); border-radius: 5px; background: var(--card); color: var(--ink); font: inherit; cursor: pointer; }
+.application-data-actions .application-data-clear { color: #994b55; }
+.application-user-settings { grid-column: 1 / -1; margin: 8px 0 0; font-size: 15px; font-weight: 600; }
+#application-global-offset { width: 110px; padding: 9px 12px; border: 1px solid var(--ui-border); border-radius: 5px; color: var(--ink); background: var(--card); font: inherit; }
+.application-advanced { grid-column: 1 / -1; color: var(--muted); font-size: 13px; }
+.application-advanced summary { cursor: pointer; }
+.application-advanced .application-rules-label { display: block; margin: 16px 0 8px; }
+.application-advanced .application-rules-help { margin: 8px 0; }

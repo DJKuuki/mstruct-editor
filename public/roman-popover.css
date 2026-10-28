@@ -1,0 +1,154 @@
+.score-roman-symbol {
+  display: inline-flex;
+  min-block-size: 1.2em;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-style: normal;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.roman-line .score-roman-symbol.has-sus-figure { transform: translateX(-.12em); }
+.modulation-line .score-roman-symbol.has-sus-figure { transform: translateX(-.12em); }
+
+.score-roman-base,
+.score-roman-applied,
+.score-roman-slash { font: inherit; }
+
+.score-roman-sup {
+  position: static;
+  top: auto;
+  align-self: flex-start;
+  margin-inline-start: .05em;
+  color: inherit;
+  font-family: "MStruct Text Accidentals", "Academico", "Crimson Pro", Georgia, serif;
+  font-size: .62em;
+  font-style: normal;
+  font-weight: inherit;
+  line-height: 1;
+  transform: translateY(-.18em);
+  vertical-align: baseline;
+}
+
+.score-roman-figures {
+  display: inline-grid;
+  align-self: center;
+  justify-items: end;
+  margin-inline-start: -.06em;
+  font-family: "MStruct Text Accidentals", "Academico", "Crimson Pro", Georgia, serif;
+  font-size: .63em;
+  font-style: normal;
+  font-weight: inherit;
+  line-height: .82;
+  vertical-align: middle;
+}
+.score-roman-figure-row {
+  /* Keep each accidental and number in one natural-width run. Right-align
+     complete rows so absent accidentals do not reserve an empty column. */
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 0;
+  text-align: center;
+}
+.score-roman-figures.has-sus {
+  align-self: flex-start;
+  font-size: .62em;
+  line-height: 1;
+  transform: translateY(-.18em);
+}
+.score-roman-figures.has-sus .score-roman-figure-row {
+  justify-self: center;
+}
+.score-roman-figure-accidental {
+  align-self: end;
+  font-size: 1.25em;
+  line-height: .82;
+  transform: translateY(-.25em);
+}
+.score-roman-figures.is-single:not(.has-sus) { align-self: flex-start; transform: translateY(.18em); }
+.score-roman-symbol.has-single-quality-figure > .score-roman-sup { transform: translateY(.18em); }
+.score-roman-symbol.has-stacked-quality-figure > .score-roman-sup {
+  /* Match the first row of the centered two-row figure stack. */
+  align-self: center;
+  font-size: .63em;
+  line-height: .82;
+  transform: translateY(-50%);
+}
+.score-roman-accidental { flex: 0 0 auto; }
+.score-roman-slash { margin-inline: .1em; }
+.score-roman-figures + .score-roman-slash { margin-inline-start: -.05em; }
+
+.roman-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-inline-size: 100%;
+  padding: 0;
+  border: 0;
+  outline-offset: .12em;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+.roman-trigger:hover { color: #557048; }
+
+.roman-voice-leading-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+
+.roman-voice-leading-segment {
+  position: absolute;
+  block-size: 1px;
+  border-radius: 999px;
+  background: currentColor;
+  color: #879987;
+  transform: translateY(-.5px);
+}
+
+.roman-voice-leading-cut {
+  position: absolute;
+  color: #596d55;
+  font-family: "MStruct Text Accidentals", "Noto Serif", Georgia, serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  line-height: .58;
+  transform: translate(-50%, -50%);
+}
+
+.roman-popover {
+  position: fixed;
+  z-index: 1200;
+  width: min(22rem, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cad8cc;
+  border-radius: 8px;
+  background: #fff;
+  color: #26372f;
+  box-shadow: 0 20px 55px rgba(32, 51, 41, .18);
+}
+
+.roman-popover::backdrop { background: transparent; }
+.roman-popover-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem .8rem; border-bottom: 1px solid #e2e9e3; }
+.roman-popover-kicker { margin: 0 0 .35rem; color: #74857a; font: 600 .72rem/1.2 "MStruct Text Accidentals", "Noto Serif", serif; letter-spacing: .08em; text-transform: uppercase; }
+.roman-popover h2 { margin: 0; color: #26372f; font: 600 1.65rem/1.1 "MStruct Text Accidentals", "Crimson Pro", Georgia, serif; }
+.roman-popover-close { min-width: 2rem; min-height: 2rem; padding: 0; border: 1px solid #d6dfd7; border-radius: 4px; background: #f8faf8; color: #53665b; font: 1.2rem/1 "MStruct Text Accidentals", sans-serif; }
+.roman-popover-close:hover { border-color: #aabd9f; background: #f0f5ed; }
+.roman-popover-results { margin: 0; padding: 1rem 1.1rem 1.15rem; }
+.roman-popover-results div { display: grid; gap: .35rem; }
+.roman-popover-results dt { color: #74857a; font: 600 .78rem/1.3 "MStruct Text Accidentals", "Noto Serif", serif; }
+.roman-popover-results dd { margin: 0; color: #2f473a; font: 600 1.1rem/1.45 "MStruct Text Accidentals", "Academico", "Noto Serif", serif; }
+
+@media (max-width: 520px) {
+  .roman-popover { width: calc(100vw - 16px); max-width: calc(100vw - 16px); }
+}

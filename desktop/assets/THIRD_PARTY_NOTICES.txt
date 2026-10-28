@@ -1,0 +1,57 @@
+MStruct 分析编辑器 — Third-Party Notices
+==========================================
+
+This desktop build contains or redistributes the following third-party
+software, fonts, icons, and audio assets. The corresponding full license
+texts are stored in the adjacent licenses directory. Electron also places
+LICENSE.electron.txt and LICENSES.chromium.html in its packaged resources.
+
+Musyng Kite acoustic grand piano soundfont
+------------------------------------------
+File: soundfonts/acoustic_grand_piano-ogg.js
+Source: https://github.com/gleitz/midi-js-soundfonts
+Published file: https://gleitz.github.io/midi-js-soundfonts/MusyngKite/acoustic_grand_piano-ogg.js
+Upstream package and conversion: Benjamin Gleitzman and contributors.
+Original soundfont: Musyng Kite.
+License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0).
+License URL: https://creativecommons.org/licenses/by-sa/3.0/
+Local license: licenses/CC-BY-SA-3.0.txt
+The downloaded soundfont payload is redistributed unmodified.
+SHA-256: 54680c0289541f06932b77d1fbdd52e362c3518bbda8b1e2233e051d667d2767
+
+Runtime libraries
+-----------------
+- Electron 44.4.5 — MIT; local license: licenses/ELECTRON-MIT.txt.
+- VexFlow 5.0.0 — MIT; local license: licenses/VEXFLOW-MIT.txt.
+- smplr 1.0.0 — MIT as declared by its npm package and upstream README;
+  local notice and license text: licenses/SMPLR-MIT.txt.
+
+Fonts
+-----
+- Academico Regular and Bold — SIL Open Font License 1.1;
+  local license: licenses/OFL-Academico.txt.
+- Bravura — SIL Open Font License 1.1;
+  local license: licenses/OFL-Bravura.txt.
+- Noto Music — SIL Open Font License 1.1;
+  local license: licenses/OFL-Noto-Music.txt.
+- Noto Serif — SIL Open Font License 1.1;
+  local license: licenses/OFL-Noto-Serif.txt.
+- Crimson Pro — SIL Open Font License 1.1;
+  local license: licenses/OFL-Crimson-Pro.txt.
+
+- MStruct Text Accidentals is a modified Noto Music text subset under SIL OFL 1.1.
+  Original: Copyright 2022 The Noto Project Authors (https://github.com/notofonts/music).
+  Sharp +192/1000 em; natural +166/1000 em; other glyphs and advances unchanged.
+  文本字体仅上抬升号与还原号，其他字形及字宽保持，派生字体沿用 SIL OFL 1.1。
+  Full license and modification notice: renderer/fonts/OFL-MStructTextAccidentals.txt.
+
+Icons
+-----
+- Lucide inline SVG paths — ISC License;
+  local license: licenses/LUCIDE-ISC.txt.
+
+Build-only tooling
+------------------
+electron-builder 26.15.3 is used to create the unpacked application and is
+not shipped as application runtime code. It is licensed under the MIT License:
+https://github.com/electron-userland/electron-builder/blob/master/LICENSE

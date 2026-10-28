@@ -1,0 +1,67 @@
+@font-face {
+  font-family: "Academico";
+  src: url("./fonts/Academico-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Academico";
+  src: url("./fonts/Academico-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+.chord-popover[open] {
+  position: fixed;
+  inset: auto;
+  z-index: 40;
+  display: grid;
+  box-sizing: border-box;
+  inline-size: min(430px, calc(100vw - 24px));
+  max-block-size: calc(100dvh - 24px);
+  padding: 0;
+  margin: 0;
+  overflow: hidden auto;
+  border: 1px solid #ccdacf;
+  border-radius: 9px;
+  color: var(--ink, #19221f);
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(25, 42, 33, .24);
+}
+.chord-popover *, .chord-popover *::before, .chord-popover *::after { box-sizing: border-box; }
+.chord-popover-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 16px 11px; border-bottom: 1px solid #e5ebe6; }
+.chord-popover-kicker { margin: 0 0 3px; color: #829087; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.chord-popover h2 { min-block-size: 36px; margin: 0; font-weight: 600; line-height: 1; }
+.chord-popover h2 .score-chord-symbol { font-size: 30px; }
+.chord-popover-close { flex: 0 0 auto; inline-size: 30px; block-size: 30px; padding: 0; border: 0; border-radius: 5px; background: #f0f4ef; color: #53645a; font-size: 23px; line-height: 1; cursor: pointer; }
+.chord-popover-close:hover { background: #e4ece3; color: #253a2f; }
+.chord-popover-body { display: grid; gap: 10px; padding: 12px 16px 4px; }
+.chord-popover-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.chord-popover-results > div { min-width: 0; }
+.chord-popover-results dt, .chord-popover-staff figcaption { margin: 0 0 3px; color: #7b8980; font-size: 11px; }
+.chord-popover-results dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: #26362f; font-family: "MStruct Text Accidentals", "Noto Music", "Segoe UI Symbol", sans-serif; font-size: 15px; line-height: 1.35; }
+.chord-popover-staff { min-width: 0; margin: 0; }
+.chord-popover-staff-canvas { inline-size: 100%; min-inline-size: 240px; block-size: 142px; overflow: hidden; background: #fff; }
+.chord-popover-staff-canvas svg { display: block; inline-size: 100%; block-size: 100%; }
+.chord-popover-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-width: 0; padding: 5px 16px 13px; }
+.chord-popover-message { flex: 1 1 auto; margin: 0; color: #a1544d; font-size: 11px; line-height: 1.35; }
+.chord-popover-play { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-inline-size: 126px; padding: 8px 11px; border: 0; border-radius: 5px; background: #30463c; color: #fff; font-size: 12px; cursor: pointer; }
+.chord-popover-play:hover { background: #20352b; }
+.chord-popover-play:disabled { cursor: wait; opacity: .72; }
+.chord-play-icon { color: var(--accent, #c8f36d); font-family: "MStruct Text Accidentals", "Noto Music", serif; font-size: 16px; line-height: 1; }
+.chord-popover-play.is-loading .chord-play-icon { animation: chord-pulse .8s ease-in-out infinite alternate; }
+.score-chord-symbol { display: inline-flex; align-items: baseline; block-size: 1.2em; max-width: 100%; color: inherit; font-family: "MStruct Text Accidentals", "Academico", "Times New Roman", serif; font-weight: 400; font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; line-height: 1.2; letter-spacing: 0; white-space: nowrap; }
+.score-chord-sup { position: static; top: auto; display: inline-block; flex: 0 0 auto; font-size: .68em; line-height: 1; vertical-align: baseline; transform: translateY(-.5em); }
+.score-chord-on { font-family: "MStruct Text Accidentals", "Academico", "Times New Roman", serif; font-style: italic; }
+.score-chord-accidental { display: inline-block; font-family: "MStruct Text Accidentals", "Noto Music", "Segoe UI Symbol", sans-serif; font-style: normal; font-weight: 400; line-height: 0; vertical-align: baseline; transform: translateY(-.08em); }
+.score-chord-accidental.score-chord-note-accidental-after { transform: translateY(-.08em); }
+.score-chord-accidental.score-chord-note-accidental-before { transform: translateY(-.10em); }
+@keyframes chord-pulse { to { opacity: .35; } }
+
+@media (max-width: 600px) {
+  .chord-popover[open] { inline-size: calc(100vw - 16px); max-block-size: calc(100dvh - 16px); }
+  .chord-popover-results { grid-template-columns: 1fr; }
+}

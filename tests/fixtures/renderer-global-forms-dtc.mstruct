@@ -1,0 +1,10 @@
+METADATA:
+{SONG_NAME}Renderer Test: Whole-song forms and DTC
+{GLOBAL_TAGS}</Sonata_Form></DTC:a,C>
+{IS_STABLE_TEMPO}True
+END_METADATA
+MAIN:
+{BN:1}{TS:4/4}{D:1/4}{TC:C}{BPM:1/4=120}{||:}</Sonata_Form:E_Sub1>C|I,</Sonata_Form:E_Sub2>G|V,</Sonata_Form:D>Am|vi,</FORM_END:Sonata_Form>C|I{:||};
+...
+{BN:8}</Pop_Form></Pop_Form:Verse>C|I,</Pop_Form:Chorus>G|V,</FORM_END:Pop_Form:Chorus>F|IV,</FORM_END>G|V;
+END_MAIN

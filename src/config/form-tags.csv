@@ -1,0 +1,67 @@
+token,zh_name,en_name,duration_mode,parent,replace_previous,allow_global
+<Binary_Form>,二部曲式,Binary Form,1,,1,1
+<Ternary_Form>,三部曲式,Ternary Form,1,,1,1
+<Rondo_Form>,回旋曲式,Rondo Form,1,,1,1
+<Arch_Form>,拱形曲式,Arch Form,1,,1,1
+<Variation_Form>,变奏曲式,Theme and Variation Form,1,,1,1
+<Sonata_Form>,奏鸣曲式,Sonata Form,1,,1,1
+<Sonata_Form:E_Intro>,奏鸣曲式：引子,Sonata Form: Intro,1,Sonata_Form,1,0
+<Sonata_Form:E_Sub1>,呈示部：主部,Exposition: First Subject,1,Sonata_Form,1,0
+<Sonata_Form:E_Transition>,呈示部：连接部,Exposition: Transition,1,Sonata_Form,1,0
+<Sonata_Form:E_MC>,呈示部：中间停顿,Exposition: Medial Caesura,1,Sonata_Form,1,0
+<Sonata_Form:E_Sub2>,呈示部：副部,Exposition: Second Subject,1,Sonata_Form,1,0
+<Sonata_Form:E_EEC>,呈示部：EEC,Exposition: EEC,1,Sonata_Form,0,0
+<Sonata_Form:E_Closing>,呈示部：结束部,Exposition: Closing Section,1,Sonata_Form,1,0
+<Sonata_Form:E_Codetta>,呈示部：小尾声,Exposition: Codetta,1,Sonata_Form,1,0
+<Sonata_Form:D>,奏鸣曲式：发展部,Sonata Form: Development,1,Sonata_Form,1,0
+<Sonata_Form:D_Retransition>,发展部：再连接部,Development: Retransition,1,Sonata_Form,1,0
+<Sonata_Form:D_DL>,发展部：属音锁定,Development: Dominant Lock,2,Sonata_Form,0,0
+<Sonata_Form:R_Sub1>,再现部：主部,Recapitulation: First Subject,1,Sonata_Form,1,0
+<Sonata_Form:R_Transition>,再现部：连接部,Recapitulation: Transition,1,Sonata_Form,1,0
+<Sonata_Form:R_Sub2>,再现部：副部,Recapitulation: Second Subject,1,Sonata_Form,1,0
+<Sonata_Form:R_ESC>,再现部：ESC,Recapitulation: ESC,1,Sonata_Form,0,0
+<Sonata_Form:R_Closing>,再现部：结束部,Recapitulation: Closing Section,1,Sonata_Form,1,0
+<Sonata_Form:Coda>,奏鸣曲式：尾声,Recapitulation: Coda,1,Sonata_Form,1,0
+<12_Bar_Blues>,12小节蓝调,12 Bar Blues,2,,1,1
+<16_Bar_Blues>,16小节蓝调,16 Bar Blues,2,,1,1
+<Pop_Form>,主歌-副歌式,Verse-Chorus Form,1,,1,1
+<Pop_Form:Intro>,主歌-副歌式：引子,Verse-Chorus Form: Intro,1,Pop_Form,1,0
+<Pop_Form:UpfrontChorus>,主歌-副歌式：冒头副歌,Verse-Chorus Form: Upfront Chorus,1,Pop_Form,1,0
+<Pop_Form:Verse>,主歌-副歌式：主歌,Verse-Chorus Form: Verse,1,Pop_Form,1,0
+<Pop_Form:Prechorus>,主歌-副歌式：预副歌,Verse-Chorus Form: Pre-Chorus,1,Pop_Form,1,0
+<Pop_Form:Chorus>,主歌-副歌式：副歌,Verse-Chorus Form: Chorus,1,Pop_Form,1,0
+<Pop_Form:PostChorus>,主歌-副歌式：后副歌,Verse-Chorus Form: Post-Chorus,1,Pop_Form,1,0
+<Pop_Form:InstBreak>,主歌-副歌式：副歌间奏,Verse-Chorus Form: Instrumental Break,1,Pop_Form,1,0
+<Pop_Form:Verse2>,主歌-副歌式：主歌第二遍,Verse-Chorus Form: Verse 2,1,Pop_Form,1,0
+<Pop_Form:Prechorus2>,主歌-副歌式：预副歌第二遍,Verse-Chorus Form: Pre-Chorus 2,1,Pop_Form,1,0
+<Pop_Form:Chorus2>,主歌-副歌式：副歌第二遍,Verse-Chorus Form: Chorus 2,1,Pop_Form,1,0
+<Pop_Form:ChorusExtension>,主歌-副歌式：副歌第二遍延长,Verse-Chorus Form: Chorus Extension,1,Pop_Form,1,0
+<Pop_Form:Bridge>,主歌-副歌式：桥部,Verse-Chorus Form: Bridge,1,Pop_Form,1,0
+<Pop_Form:Bridge_Solo>,主歌-副歌式：桥部乐器独奏,Verse-Chorus Form: Bridge Instrumental Solo,1,Pop_Form,1,0
+<Pop_Form:PreChorus3>,主歌-副歌式：预副歌第三遍,Verse-Chorus Form: Pre-Chorus 3,1,Pop_Form,1,0
+<Pop_Form:BreakdownChorus>,主歌-副歌式：静奏副歌,Verse-Chorus Form: Breakdown Chorus,1,Pop_Form,1,0
+<Pop_Form:Chorus3+>,主歌-副歌式：副歌第三遍+,Verse-Chorus Form: Chorus 3+,1,Pop_Form,1,0
+<Pop_Form:Outro>,主歌-副歌式：尾声,Verse-Chorus Form: Outro,1,Pop_Form,1,0
+<Canon>,卡农,Canon,1,,1,1
+<Fugue>,赋格,Fugue,1,,1,1
+<StropheBridge_Form>,主段-桥部式,Strophe-Bridge Form,1,,1,1
+<StropheBridge_Form:Intro>,主段-桥部式：引子,Strophe-Bridge Form: Intro,1,StropheBridge_Form,1,0
+<StropheBridge_Form:Strophe>,主段-桥部式：主段,Strophe-Bridge Form: Strophe,1,StropheBridge_Form,1,0
+<StropheBridge_Form:Bridge>,主段-桥部式：桥部,Strophe-Bridge Form: Bridge,1,StropheBridge_Form,1,0
+<StropheBridge_Form:InstBridge>,主段-桥部式：器乐桥部,Strophe-Bridge Form: Instrumental Bridge,1,StropheBridge_Form,1,0
+<StropheBridge_Form:Refrain>,主段-桥部式：叠句,Strophe-Bridge Form: Refrain,1,StropheBridge_Form,0,0
+<StropheBridge_Form:Outro>,主段-桥部式：尾声,Strophe-Bridge Form: Outro,1,StropheBridge_Form,1,0
+<Strophic_Form>,分节歌式,Strophic Form,1,,1,0
+<Strophic_Form:Intro>,分节歌式：引子,Strophic Form: Intro,1,Strophic_Form,1,0
+<Strophic_Form:Strophe>,分节歌式：主段,Strophic Form: Strophe,1,Strophic_Form,1,0
+<Strophic_Form:Refrain>,分节歌式：叠句,Strophic Form: Refrain,1,Strophic_Form,0,0
+<Strophic_Form:InstStrophe>,分节歌式：器乐主段,Strophic Form: Instrumental Strophe,1,Strophic_Form,1,0
+<Strophic_Form:InstBreak>,分节歌式：器乐间奏,Strophic Form: Instrumental Break,1,Strophic_Form,1,0
+<Strophic_Form:Outro>,分节歌式：尾声,Strophic Form: Outro,1,Strophic_Form,1,0
+<EDM_Form>,EDM曲式,EDM Form,1,,1,1
+<EDM_Form:Intro>,EDM曲式：引子,EDM Form: Intro,1,EDM_Form,1,0
+<EDM_Form:Groove>,EDM曲式：节拍主段,EDM Form: Groove,1,EDM_Form,1,0
+<EDM_Form:Breakdown>,EDM曲式：Breakdown段,EDM Form: Breakdown,1,EDM_Form,1,0
+<EDM_Form:BuildUp>,EDM曲式：蓄势段,EDM Form: Build-Up,1,EDM_Form,1,0
+<EDM_Form:Drop>,EDM曲式：Drop段,EDM Form: Drop,1,EDM_Form,1,0
+<EDM_Form:Outro>,EDM曲式：尾声,EDM Form: Outro,1,EDM_Form,1,0

@@ -1,0 +1,21 @@
+token,zh_name,en_name,roman_kind,allowed_romans
+<PAC>,PAC,PAC,none,
+<IAC:not_tonic>,IAC：高音不是主音,IAC: Soprano isn't Tonic,none,
+<IAC:inverted>,IAC：转位和弦,IAC: Inverted Chord,none,
+<IAC:viio>,IAC：viio,IAC: viio,fixed,
+<Picardy_Third>,皮卡迪三度,Picardy Third,none,
+<EC>,EC,EC,none,
+<Minor_Dominant_Cadence>,小属终止,Minor Dominant Cadence,none,
+<PC:>,PC：,PC:,parameter,"IV,iv,ii,iio,iiho7"
+<Backdoor_Cadence>,后门终止,Backdoor Cadence,none,
+<Aeolian_Cadence>,伊奥利亚终止,Aeolian Cadence,none,
+<Mario_Cadence>,马里奥终止,Mario Cadence,none,
+<Aeolian_Cadence:minor>,小三和弦伊奥利亚终止,Minor Aeolian Cadence,none,
+<Phrygian_Cadence_to_Tonic:>,主音弗里吉亚终止：,Phrygian Cadence to Tonic:,parameter,"bII,bII7,VS7,VS7b5,VSBlk"
+<Tritone_Cadence>,三全音终止,Tritone Cadence,none,
+<Mediant_Cadence:>,中音终止：,Mediant Cadence:,parameter,"III,iii,bIII,biii,nIII,niii,VI,vi,bVI,bvi,nVI,nvi"
+<HC>,HC,HC,none,
+<HC:Phrygian>,弗里吉亚半终止,Phrygian HC,none,
+<HC-PAC>,HC-PAC,HC-PAC,none,
+<HC-IAC>,HC-IAC,HC-IAC,none,
+<DC:>,DC：,DC:,parameter,"III,iii,bIII,biii,nIII,niii,IV,iv,VI,vi,bVI,bvi,nVI,nvi"

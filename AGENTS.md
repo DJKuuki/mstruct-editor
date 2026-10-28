@@ -1,0 +1,10 @@
+# MStruct Editor 工作约定 / Working rules
+
+- 此仓库是解析、音乐理论、制谱、搜索、播放模型和共享 UI 的唯一源码。主站只适配宿主能力，不复制实现。 / This repository is the sole source for parsing, theory, engraving, search, playback models and shared UI; hosts adapt capabilities rather than copy implementations.
+- 共享核心与 UI 不依赖 Electron、主站组件、数据库或文件系统；平台能力放在 `src/runtime/`、`desktop/` 并注入。`src/main.js` 保持装配职责。 / Keep shared core/UI independent of Electron, website components, databases and filesystems. Inject platform capabilities from `src/runtime/` and `desktop/`; keep `src/main.js` focused on assembly.
+- 改动前检查相关模块和测试；优先定向验证，交付前集中运行一次 `npm.cmd test` 与构建。共享改动还要覆盖 standalone、hosted editor、viewer。 / Inspect affected modules/tests first, run targeted checks while developing, then one final suite/build. Shared changes also require standalone, hosted editor and viewer verification.
+- `examples/k545.mstruct` 是启动示例和回归基线；正式内置规则是 `src/config/official-profile.json`，不因源码配置草稿改变而擅自重发。 / `examples/k545.mstruct` is the startup and regression baseline. Do not silently republish the formal `src/config/official-profile.json` snapshot from draft configuration changes.
+- 同一规则 ID／版本承诺向后兼容；破坏性变更必须新版本，hash 用于完整性与精确历史。 / The same rules ID/version promises backwards compatibility. Breaking changes require a new version; hashes identify exact history and integrity.
+- 用户可见文案同时维护简体中文与英文。新增第三方材料先核验来源／许可，并更新第三方通知。 / Maintain Simplified Chinese and English user-facing text. Check sources/licenses before adding third-party material and update notices.
+- 使用 `rg` 定位、`apply_patch` 编辑。保留已有改动，未经要求不执行破坏性 Git／文件操作。不要提交依赖、`dist/`、`release/`、`user-data/`、临时测试数据或密钥。 / Use `rg` and `apply_patch`; preserve existing changes and avoid unrequested destructive operations. Do not commit dependencies, builds, releases, user data, test scratch files or secrets.
+- 人工打包使用仓库内 `build-mstruct-editor-exe.bat`，BAT 保持 CRLF／无 BOM。完成后关闭自己启动的临时服务，用户明确要求保留时除外。 / Use the repository's BAT for manual packaging and retain CRLF without BOM. Stop temporary services you started unless the user asks to keep them.

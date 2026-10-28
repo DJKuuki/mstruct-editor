@@ -1,0 +1,60 @@
+/* Shared by the editor and host navigation. Keep each control's hit area intact. */
+nav[data-renderer-nav-layout] {
+  display: grid;
+  grid-template-areas: "left transport right";
+  grid-template-columns: minmax(max-content, 1fr) max-content minmax(max-content, 1fr);
+  align-items: center;
+  gap: 4px 10px;
+  block-size: auto;
+  min-block-size: 40px;
+  padding-block: 5px;
+}
+
+nav[data-renderer-nav-layout] > :nth-child(1) {
+  grid-area: left;
+  justify-self: start;
+  inline-size: auto;
+  min-inline-size: 0;
+  flex-wrap: wrap;
+}
+
+nav[data-renderer-nav-layout] > [hidden] {
+  display: none !important;
+}
+
+nav[data-renderer-nav-layout] > :nth-child(2) {
+  grid-area: transport;
+  justify-self: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav[data-renderer-nav-layout] > :nth-child(3) {
+  grid-area: right;
+  justify-self: end;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+nav[data-renderer-nav-layout="wrapped"] {
+  grid-template-areas: "left right" "transport transport";
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+nav[data-renderer-nav-layout="stacked"] {
+  grid-template-areas: "left" "transport" "right";
+  grid-template-columns: minmax(0, 1fr);
+}
+
+nav[data-renderer-nav-layout] > :is(:nth-child(1), :nth-child(2), :nth-child(3)) > * {
+  flex-shrink: 0;
+}
+
+nav[data-renderer-nav-layout] > :nth-child(1) > select {
+  min-inline-size: 160px;
+  max-inline-size: 220px;
+}

@@ -1,0 +1,23 @@
+token,root_degree,roman_structure,base_text,superscript_text,figure_upper,figure_lower,allowed_figured_bass,requires_figured_bass,seventh_override,note_name_special
+Ger+6,b6,b6 1 b3 #4,Ger,+6,,,,,,aug6
+Gero3,b6,#4 b6 1 b3,Ger,o,3,,,,,aug6dim3
+Fr+6,b6,b6 1 2 #4,Fr,+6,,,,,,aug6
+It+6,b6,b6 1 #4,It,+6,,,,,,aug6
+Tr+6,b6,b6 7 2 #4,Tr,+6,,,,,,aug6
+Blk+6,b6,b6 b7 2 #4,Blk,+6,,,,,,aug6
+VS,b2,b2 4 b6,V(S),,,,"7,65,43,42,7b5,[]",True,b7,
+VSBlk,b2,b2 b3 5 7,V(S),Blk,,,,,,
+viio,7,7 2 4,vii,o,,,,,,
+viio6,7,2 4 7,vii,o,6,,,,,
+viio64,7,4 7 2,vii,o,6,4,,,,
+viio7,7,7 2 4 b6,vii,o,7,,,,,
+viio65,7,2 4 b6 7,vii,o,6,5,,,,
+viio43,7,4 b6 7 2,vii,o,4,3,,,,
+viio42,7,b6 7 2 4,vii,o,4,2,,,,
+viioM7,7,7 2 4 #6,vii,oM7,,,,,,
+viiho7,7,7 2 4 6,vii,ho,7,,,,,
+viiho65,7,2 4 6 7,vii,ho,6,5,,,,
+viiho43,7,4 6 7 2,vii,ho,4,3,,,,
+viiho42,7,6 7 2 4,vii,ho,4,2,,,,
+cto7,1,,CT,o,7,,,,,
+ct+6,1,1 #2 #4 b6,CT,+6,,,,,,

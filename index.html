@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Standalone .mstruct editor and HTML renderer." />
+    <title>分析编辑器</title>
+    <link rel="stylesheet" href="/text-accidentals.css" />
+    <link rel="stylesheet" href="/chord-popover.css" />
+    <link rel="stylesheet" href="/roman-popover.css" />
+    <link rel="stylesheet" href="/duration-notes.css" />
+    <link rel="stylesheet" href="/comment-popover.css" />
+    <link rel="stylesheet" href="/inline-music.css" />
+    <style>
+      html { background: #f7f9f5; }
+      body:not(.editor-ready) { visibility: hidden; }
+    </style>
+  </head>
+  <body>
+    <main class="editor-app">
+      <header class="editor-header">
+        <div class="editor-brand editor-tool-switcher" id="editorToolSwitcher">
+          <h1>
+            <button class="editor-tool-switcher-button" id="editorToolSwitcherButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Switch editor">
+              <span id="editorToolTitle" data-i18n="appTitle">Analysis Editor</span>
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+          </h1>
+          <div class="editor-tool-menu" id="editorToolMenu" role="menu" aria-label="Switch editor">
+            <button type="button" role="menuitemradio" aria-checked="true" data-editor-tool="analysis"><span data-i18n="appTitle">Analysis Editor</span><span aria-hidden="true">✓</span></button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-editor-tool="timeline"><span data-i18n="timelineEditorTitle">Timeline Editor</span><span aria-hidden="true">✓</span></button>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="analysis-header-actions">
+            <p id="renderStatus" class="render-status" aria-live="polite" data-i18n="waiting">Waiting to Render</p>
+            <button class="metadata-button" id="newButton" type="button" data-i18n="newFile">New</button>
+            <button class="metadata-button" id="importButton" type="button" data-i18n="import">Import .mstruct</button>
+            <button class="metadata-button" id="exportButton" type="button" data-i18n="export">Export .mstruct</button>
+            <button class="metadata-button" id="commentsButton" type="button" data-i18n="editComments">Edit Comments</button>
+            <button class="metadata-button" id="metadataButton" type="button" data-i18n="editMetadata">Edit Metadata</button>
+            <button class="metadata-button" id="editorSettingsButton" type="button" data-i18n="editorSettings">Editor Settings</button>
+            <button class="metadata-button" id="saveDraftButton" type="button" hidden data-i18n="saveDraft">Save Draft</button>
+            <button class="metadata-button discard-draft-button" id="discardDraftButton" type="button" hidden data-i18n="discardDraft">Discard Editing</button>
+            <button class="render-button" id="submitAnalysisButton" type="button" hidden data-i18n="submitAnalysis">Submit Analysis</button>
+            <button class="render-button" id="renderButton" type="button">
+              <span data-i18n="render">Render</span> <span>Ctrl + Enter</span>
+            </button>
+          </div>
+          <div class="timeline-header-actions">
+            <button class="metadata-button" id="timelineImportFileButton" type="button" data-i18n="timelineImportFile">Import .mstructtime</button>
+            <button class="metadata-button" id="timelineExportFileButton" type="button" data-i18n="timelineExportFile">Export .mstructtime</button>
+            <button class="metadata-button" id="timelineSaveButton" type="button" data-i18n="saveFile">Save</button>
+            <button class="metadata-button" id="timelineMetadataButton" type="button" data-i18n="timelineEditMetadata">Edit Timeline Info</button>
+            <button class="metadata-button" id="timelineEditorSettingsButton" type="button" data-i18n="editorSettings">Editor Settings</button>
+          </div>
+          <button class="metadata-button" id="applicationSettingsButton" type="button" hidden data-i18n="applicationSettings">Settings</button>
+          <div class="standalone-language" id="standaloneLanguage">
+            <button class="standalone-language-button" id="standaloneLanguageButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Select language" title="Select language" data-i18n-aria="language" data-i18n-title="language"><span aria-hidden="true">🌐︎</span></button>
+            <div class="standalone-language-menu" role="menu" aria-label="Select language" data-i18n-aria="language">
+              <button type="button" role="menuitemradio" data-locale="zh" data-i18n="languageChinese">简体中文</button>
+              <button type="button" role="menuitemradio" data-locale="en" data-i18n="languageEnglish">English</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="mstruct editor workspace" data-i18n-aria="workspace">
+        <section class="renderer-panel panel" id="rendererPanel" aria-label="Rendered score" data-i18n-aria="renderer">
+          <!-- Navigation SVG paths: Lucide, lucide-react 1.34.0; see ./icons/LUCIDE-LICENSE.txt. -->
+          <nav class="renderer-nav" data-renderer-nav-layout aria-label="Renderer navigation" data-i18n-aria="rendererNavigation">
+            <div class="renderer-nav-left">
+              <select class="renderer-timeline" id="rendererTimeline" aria-label="Select timeline file" data-i18n-aria="rendererTimeline"><option value="" data-i18n="rendererTimeline">Select timeline file</option></select>
+              <button class="renderer-icon-button renderer-timeline-events" id="rendererTimelineManager" type="button" hidden aria-label="Edit timeline file list" title="Edit timeline file list" data-i18n-aria="timelineManageFiles" data-i18n-title="timelineManageFiles"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><circle cx="3" cy="6" r=".7" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r=".7" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r=".7" fill="currentColor" stroke="none"/></svg></button>
+              <button class="renderer-icon-button" id="rendererTimelineDownload" type="button" hidden aria-label="Download timeline file" title="Download timeline file" data-i18n-aria="timelineDownload" data-i18n-title="timelineDownload"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+              <button class="renderer-icon-button" id="rendererTimelineHistory" type="button" hidden aria-label="Timeline history" title="Timeline history" data-i18n-aria="timelineHistory" data-i18n-title="timelineHistory"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button>
+            </div>
+            <div class="renderer-transport">
+              <output class="renderer-playback-readout renderer-playback-time" id="rendererPlaybackTime" aria-label="Playback time" data-i18n-aria="rendererPlaybackTime">00:00.000</output>
+              <button class="renderer-icon-button" id="rendererAutoScroll" type="button" aria-label="Auto-scroll" title="Auto-scroll" aria-pressed="false" data-i18n-aria="rendererAutoScroll" data-i18n-title="rendererAutoScroll"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 14 4 4 4-4"/><path d="M12 4v14"/><path d="M4 11h16"/></svg></button>
+              <button class="renderer-icon-button" id="rendererStop" type="button" aria-label="Stop" title="Stop" data-i18n-aria="rendererStop" data-i18n-title="rendererStop"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
+              <button class="renderer-icon-button" id="rendererPlayPause" type="button" aria-label="Play" title="Play" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></button>
+              <button class="renderer-icon-button" id="rendererGoTo" type="button" aria-label="Go to" title="Go to" aria-pressed="false" data-i18n-aria="rendererGoTo" data-i18n-title="rendererGoTo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/></svg></button>
+              <button class="renderer-icon-button" id="rendererPiano" type="button" aria-label="Enable piano" title="Enable piano" aria-pressed="false" data-i18n-aria="rendererPiano" data-i18n-title="rendererPiano"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+              <div class="renderer-volume-control">
+                <button class="renderer-icon-button" id="rendererVolume" type="button" aria-label="BGM volume" title="BGM volume" aria-expanded="false" aria-controls="rendererVolumePanel" data-i18n-aria="rendererVolume" data-i18n-title="rendererVolume"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+                <div class="renderer-volume-panel" id="rendererVolumePanel" hidden>
+                  <input id="rendererVolumeSlider" type="range" min="0" max="100" step="1" value="100" aria-label="BGM volume" data-i18n-aria="rendererVolume" />
+                  <output id="rendererVolumeValue">100%</output>
+                </div>
+              </div>
+              <button class="renderer-icon-button" id="rendererBgmFile" type="button" aria-label="Choose BGM file" title="Choose BGM file" data-i18n-aria="rendererBgmFile" data-i18n-title="rendererBgmFile"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"></svg></button>
+              <input id="rendererBgmInput" type="file" accept=".mp3,.wav,audio/mpeg,audio/wav,audio/x-wav" hidden />
+              <output class="renderer-playback-readout renderer-playback-position" id="rendererPlaybackPosition" aria-label="Current measure position" data-i18n-aria="rendererPlaybackPosition">—</output>
+              <output class="renderer-audio-notice" id="rendererAudioNotice" aria-live="polite" hidden></output>
+            </div>
+            <div class="renderer-nav-right">
+              <div class="renderer-offset">
+                <button class="renderer-icon-button" id="rendererOffsetDown" type="button" aria-label="Decrease offset by 10" title="Decrease offset by 10" data-i18n-aria="rendererOffsetDown" data-i18n-title="rendererOffsetDown"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+                <input id="rendererOffset" type="text" inputmode="decimal" value="0" aria-label="Temporary offset" placeholder="Temporary offset" data-i18n-aria="rendererOffset" data-i18n-placeholder="rendererOffset" />
+                <button class="renderer-icon-button" id="rendererOffsetUp" type="button" aria-label="Increase offset by 10" title="Increase offset by 10" data-i18n-aria="rendererOffsetUp" data-i18n-title="rendererOffsetUp"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+              </div>
+              <div class="renderer-actions">
+                <div class="renderer-search-control">
+                  <button class="renderer-icon-button" id="rendererSearch" type="button" aria-label="Search" title="Search" aria-expanded="false" aria-pressed="false" aria-controls="rendererSearchPanel" data-i18n-aria="rendererSearch" data-i18n-title="rendererSearch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></button>
+                  <div class="renderer-search-panel" id="rendererSearchPanel" role="search" hidden>
+                    <div class="renderer-search-row">
+                      <input id="rendererSearchInput" type="text" autocomplete="off" spellcheck="false" aria-label="Event constraints" aria-describedby="rendererSearchError" aria-invalid="false" placeholder="Enter event constraints…" data-i18n-aria="rendererSearchInput" data-i18n-placeholder="rendererSearchInput" data-i18n-title="rendererSearchHelp" />
+                      <button class="renderer-search-step" id="rendererSearchPrevious" type="button" aria-label="Previous match" title="Previous match" data-i18n-aria="rendererSearchPrevious" data-i18n-title="rendererSearchPrevious">‹</button>
+                      <output id="rendererSearchCount" aria-live="polite">0 / 0</output>
+                      <button class="renderer-search-step" id="rendererSearchNext" type="button" aria-label="Next match" title="Next match" data-i18n-aria="rendererSearchNext" data-i18n-title="rendererSearchNext">›</button>
+                      <button class="renderer-search-close" id="rendererSearchClose" type="button" aria-label="Close search" title="Close search" data-i18n-aria="rendererSearchClose" data-i18n-title="rendererSearchClose">×</button>
+                    </div>
+                    <p class="renderer-search-error" id="rendererSearchError" role="alert" hidden></p>
+                  </div>
+                </div>
+                <button class="renderer-icon-button" id="rendererFullscreen" type="button" aria-label="Fullscreen" title="Fullscreen" aria-pressed="false" data-i18n-aria="rendererFullscreen" data-i18n-title="rendererFullscreen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+                <div class="renderer-layer-control">
+                  <button class="renderer-icon-button" id="rendererLayers" type="button" aria-label="Layers" title="Layers" aria-expanded="false" aria-controls="rendererLayersPanel" data-i18n-aria="rendererLayers" data-i18n-title="rendererLayers"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></button>
+                  <div class="renderer-layer-panel" id="rendererLayersPanel" hidden>
+                    <label><input type="checkbox" data-renderer-layer="speed" checked /><span data-i18n="rendererLayerSpeed">Tempo marks</span></label>
+                    <label><input type="checkbox" data-renderer-layer="form" checked /><span data-i18n="rendererLayerForm">Forms</span></label>
+                    <label><input type="checkbox" data-renderer-layer="tags" checked /><span data-i18n="rendererLayerTags">Tags</span></label>
+                    <label><input type="checkbox" data-renderer-layer="comments" checked /><span data-i18n="rendererLayerComments">Comments</span></label>
+                    <label><input type="checkbox" data-renderer-layer="newRiemannian" checked /><span data-i18n="rendererLayerNewRiemannian">Neo-Riemannian transformations</span></label>
+                  </div>
+                </div>
+                <button class="renderer-icon-button" id="rendererLock" type="button" aria-label="Lock" title="Lock" aria-pressed="true" data-i18n-aria="rendererLock" data-i18n-title="rendererLock"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg></button>
+            <button class="renderer-settings-button" id="rendererSettingsButton" type="button" aria-label="Settings" title="Settings" data-i18n-aria="rendererSettings" data-i18n-title="rendererSettings">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+              </div>
+            </div>
+            <input class="renderer-playback-progress" id="rendererPlaybackProgress" type="range" min="0" max="0" step="1" value="0" disabled aria-label="Playback progress" data-i18n-aria="rendererPlaybackProgress" />
+          </nav>
+          <div class="renderer-canvas" id="rendererCanvas" aria-live="polite"></div>
+          <aside class="renderer-fullscreen-info" id="rendererFullscreenInfo" aria-label="Current playback information" data-i18n-aria="rendererFullscreenInfo">
+            <div class="renderer-fullscreen-overview">
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererPlaybackTime">Playback time</h2><output id="rendererFullscreenTimestamp">00:00.000</output></section>
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenMeasure">Measure</h2><output id="rendererFullscreenMeasure">—</output></section>
+              <section class="renderer-fullscreen-field"><h2 data-i18n="timeSignature">Time Signature</h2><output id="rendererFullscreenTimeSignature">—</output></section>
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenBpm">Current BPM</h2><output id="rendererFullscreenBpm">—</output></section>
+            </div>
+            <div class="renderer-fullscreen-harmony">
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenChord">Chord Symbol</h2><div class="renderer-fullscreen-fit" id="rendererFullscreenChord">—</div></section>
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenNoteNames">Chord Note Names</h2><div class="renderer-fullscreen-fit" id="rendererFullscreenNoteNames">—</div></section>
+              <section class="renderer-fullscreen-field renderer-fullscreen-staff-field"><h2 data-i18n="chordStaff">Staff</h2><div class="renderer-fullscreen-staff" id="rendererFullscreenStaff"></div></section>
+            </div>
+            <div class="renderer-fullscreen-analysis">
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenRoman">Roman Numeral</h2><div id="rendererFullscreenRoman">—</div></section>
+              <section class="renderer-fullscreen-field"><h2 data-i18n="rendererFullscreenForm">Form Symbol</h2><div id="rendererFullscreenForm">—</div></section>
+            </div>
+            <section class="renderer-fullscreen-field renderer-fullscreen-tags-field"><h2 data-i18n="rendererFullscreenTags">Active Tags</h2><div class="renderer-fullscreen-tags" id="rendererFullscreenTags">—</div></section>
+            <section class="renderer-fullscreen-field renderer-fullscreen-comment-field"><h2 data-i18n="rendererFullscreenComment">Comment</h2><div class="renderer-fullscreen-comment" id="rendererFullscreenComment">—</div></section>
+          </aside>
+        </section>
+
+        <section class="script-panel panel" id="analysisScriptPanel" aria-label="MAIN script editor" data-i18n-aria="scriptEditor">
+          <p class="visually-hidden" id="lineCount" aria-live="polite">1 line</p>
+          <div class="editor-layout">
+            <div class="code-editor" id="codeEditor">
+              <div class="line-gutter" id="lineGutter" aria-hidden="true"></div>
+              <div class="code-scroll">
+                <div class="line-wrap-measure" id="lineWrapMeasure" aria-hidden="true"></div>
+                <pre class="highlight-layer" id="highlightLayer" aria-hidden="true"></pre>
+                <textarea
+                  id="sourceInput"
+                  aria-label="MAIN script editor"
+                  data-i18n-aria="scriptEditor"
+                  autocapitalize="off"
+                  autocomplete="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  wrap="off"
+                ></textarea>
+              </div>
+            </div>
+            <div
+              class="resize-handle"
+              id="resizeHandle"
+              role="separator"
+              aria-label="Resize the script and toolbox"
+              data-i18n-aria="resize"
+              aria-orientation="horizontal"
+              tabindex="0"
+            ></div>
+            <aside class="toolbox" id="toolbox" aria-label="Script tools" data-i18n-aria="tools"></aside>
+          </div>
+        </section>
+
+        <section class="timeline-workspace" id="timelineWorkspace" aria-label="Timeline editor workspace" data-i18n-aria="timelineWorkspace" hidden>
+          <div class="timeline-center-column">
+            <section class="timeline-loop-panel panel" aria-labelledby="timelineLoopHeading">
+              <header class="timeline-panel-header">
+                <div>
+                  <p class="panel-kicker">.MSTRUCTTIME</p>
+                  <h2 id="timelineLoopHeading" data-i18n="timelineLoopEditor">LOOP Editor</h2>
+                </div>
+                <button class="renderer-icon-button timeline-import-button" id="timelineImportLoop" type="button" aria-label="Import LOOP data" title="Import LOOP data" data-i18n-aria="timelineImportLoop" data-i18n-title="timelineImportLoop"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button>
+              </header>
+              <div class="timeline-loop-block">
+                <div class="timeline-loop-editor">
+                  <div class="timeline-line-gutter" id="timelineLoopGutter" aria-hidden="true"></div>
+                  <textarea id="timelineLoopInput" aria-label="LOOP data editor" data-i18n-aria="timelineLoopInput" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" wrap="off"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section class="timeline-event-panel panel" id="timelineEventPanel" tabindex="-1" aria-labelledby="timelineEventHeading">
+              <header class="timeline-panel-header timeline-event-header">
+                <div>
+                  <p class="panel-kicker">MAIN</p>
+                  <h2 id="timelineEventHeading" data-i18n="timelineEventList">Event List</h2>
+                </div>
+                <div class="timeline-event-actions">
+                  <button class="dialog-secondary" id="timelineResetButton" type="button" data-i18n="timelineReset">Reset</button>
+                  <label class="timeline-event-order">
+                    <span class="visually-hidden" data-i18n="timelineEventOrder">Event order</span>
+                    <select id="timelineEventOrder" aria-label="Event order" data-i18n-aria="timelineEventOrder">
+                      <option value="ascending" data-i18n="timelineAscending">Ascending</option>
+                      <option value="descending" data-i18n="timelineDescending">Descending</option>
+                    </select>
+                  </label>
+                </div>
+              </header>
+              <div class="timeline-event-table-wrap">
+                <table class="timeline-event-table">
+                  <thead><tr><th data-i18n="timelineEventNumber">Event</th><th data-i18n="timelineMeasure">Measure</th><th data-i18n="timelineBeat">Beat</th><th data-i18n="timelinePass">Pass</th><th data-i18n="timelineMilliseconds">Milliseconds</th></tr></thead>
+                  <tbody id="timelineEventRows">
+                    <tr class="timeline-event-empty"><td colspan="5"><span data-i18n="timelineEventsPending">Event rows will be generated in a later implementation.</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <aside class="timeline-waveform-panel panel" aria-labelledby="timelineWaveformHeading">
+            <header class="timeline-panel-header">
+              <div>
+                <p class="panel-kicker">AUDIO</p>
+                <h2 id="timelineWaveformHeading" data-i18n="timelineEventTimeline">Event Timeline</h2>
+              </div>
+              <div class="timeline-scale-actions">
+                <button class="renderer-icon-button" id="timelineZoomIn" type="button" aria-label="Zoom in" title="Zoom in" data-i18n-aria="timelineZoomIn" data-i18n-title="timelineZoomIn">+</button>
+                <button class="renderer-icon-button" id="timelineZoomOut" type="button" aria-label="Zoom out" title="Zoom out" data-i18n-aria="timelineZoomOut" data-i18n-title="timelineZoomOut">−</button>
+                <button class="renderer-icon-button timeline-count-in" id="timelineCountIn" type="button" aria-pressed="false" aria-label="3 2 1 count-in" title="3 2 1 count-in" data-i18n-aria="timelineCountIn" data-i18n-title="timelineCountIn">321</button>
+              </div>
+            </header>
+            <div class="timeline-waveform-scroll" id="timelineScaleScroll" tabindex="0" aria-label="Scrollable event timeline" data-i18n-aria="timelineEventTimelineScroll">
+              <div class="timeline-scale" id="timelineScale"></div>
+              <p id="timelineScaleEmpty" data-i18n="timelineEventTimelineEmpty">Choose a timeline file to edit timestamps.</p>
+            </div>
+            <button class="timeline-record-button" id="timelineRecordButton" type="button" disabled><span data-i18n="timelineRecordEvent">Record Event</span><kbd>Enter</kbd></button>
+          </aside>
+        </section>
+      </section>
+    </main>
+    <input id="importInput" type="file" accept=".mstruct,text/plain" hidden />
+    <input id="timelineImportInput" type="file" accept=".mstructtime,text/plain" hidden />
+    <div class="timeline-countdown-overlay" id="timelineCountdownOverlay" hidden aria-live="assertive"></div>
+    <dialog class="settings-dialog timeline-manager-dialog" id="timelineManagerDialog" aria-labelledby="timelineManagerTitle">
+      <div class="settings-form">
+        <header class="settings-dialog-header"><div><p class="metadata-kicker">MSTRUCTTIME</p><h2 id="timelineManagerTitle" data-i18n="timelineManageFiles">Edit timeline file list</h2></div></header>
+        <div class="timeline-manager-list" id="timelineManagerList"></div>
+        <footer class="metadata-dialog-footer"><button class="dialog-secondary" id="timelineManagerClose" type="button" data-i18n="done">Done</button><button class="render-button" id="timelineCreateButton" type="button" data-i18n="timelineCreate">Create Timeline</button></footer>
+      </div>
+    </dialog>
+    <dialog class="metadata-dialog timeline-metadata-dialog" id="timelineMetadataDialog" aria-labelledby="timelineMetadataTitle">
+      <form class="metadata-form" id="timelineMetadataForm" novalidate>
+        <header class="metadata-dialog-header"><div><p class="metadata-kicker">METADATA</p><h2 id="timelineMetadataTitle" data-i18n="timelineEditMetadata">Edit Timeline Info</h2><p data-i18n="timelineMetadataDescription">Recording information and duration belong to this timeline file.</p></div><button class="dialog-close" id="timelineMetadataClose" type="button" aria-label="Close Timeline Info Dialog" data-i18n-aria="timelineCloseMetadata">×</button></header>
+        <div class="metadata-fields" id="timelineMetadataFields"></div>
+        <footer class="metadata-dialog-footer"><button class="dialog-secondary" id="timelineMetadataCancel" type="button" data-i18n="cancel">Cancel</button><button class="render-button" type="submit" data-i18n="timelineSaveMetadata">Save Timeline Info</button></footer>
+      </form>
+    </dialog>
+    <dialog class="settings-dialog timeline-reset-dialog" id="timelineResetDialog" aria-labelledby="timelineResetTitle">
+      <form class="settings-form" id="timelineResetForm">
+        <header class="settings-dialog-header"><div><p class="metadata-kicker">MAIN</p><h2 id="timelineResetTitle" data-i18n="timelineResetTitle">Reset timestamps</h2><p data-i18n="timelineResetDescription">Clear timestamps in this measure and all later measures, including orphaned data.</p></div></header>
+        <label class="metadata-field"><span class="metadata-field-label" data-i18n="timelineResetMeasure">Starting measure</span><input id="timelineResetMeasure" type="number" min="0" step="1" required /></label>
+        <footer class="metadata-dialog-footer"><button class="dialog-secondary" id="timelineResetCancel" type="button" data-i18n="cancel">Cancel</button><button class="render-button" type="submit" data-i18n="timelineReset">Reset</button></footer>
+      </form>
+    </dialog>
+    <dialog class="settings-dialog timeline-confirm-dialog" id="timelineImportConfirmDialog" aria-labelledby="timelineImportConfirmTitle">
+      <div class="settings-form">
+        <header class="settings-dialog-header">
+          <div>
+            <p class="metadata-kicker">LOOP</p>
+            <h2 id="timelineImportConfirmTitle" data-i18n="timelineImportConfirmTitle">Overwrite LOOP data?</h2>
+            <p data-i18n="timelineImportConfirmDescription">Existing or edited LOOP data will be replaced by the repeat data imported from the analysis.</p>
+          </div>
+        </header>
+        <footer class="metadata-dialog-footer">
+          <button class="dialog-secondary" id="timelineImportConfirmCancel" type="button" data-i18n="cancel">Cancel</button>
+          <button class="render-button" id="timelineImportConfirmOverwrite" type="button" data-i18n="timelineOverwrite">Overwrite</button>
+        </footer>
+      </div>
+    </dialog>
+    <dialog class="metadata-dialog" id="metadataDialog" aria-labelledby="metadataDialogTitle">
+      <form class="metadata-form" id="metadataForm" novalidate>
+        <header class="metadata-dialog-header">
+          <div>
+            <p class="metadata-kicker">METADATA</p>
+            <h2 id="metadataDialogTitle" data-i18n="editMetadata">Edit Metadata</h2>
+            <p data-i18n="metadataDescription">Metadata is maintained independently from the MAIN script on the right.</p>
+          </div>
+          <button class="dialog-close" id="metadataClose" type="button" aria-label="Close metadata dialog" data-i18n-aria="closeMetadata">×</button>
+        </header>
+        <div class="metadata-fields" id="metadataFields"></div>
+        <footer class="metadata-dialog-footer">
+          <button class="dialog-secondary" id="metadataCancel" type="button" data-i18n="cancel">Cancel</button>
+          <button class="dialog-secondary" id="initialMstructImport" type="button" hidden data-i18n="import">Import .mstruct</button>
+          <button class="render-button" type="submit" data-i18n="saveMetadata">Save Metadata</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog class="settings-dialog renderer-settings-dialog" id="rendererSettingsDialog" aria-labelledby="rendererSettingsDialogTitle">
+      <div class="settings-form">
+        <header class="settings-dialog-header">
+          <div>
+            <p class="metadata-kicker" data-i18n="settingsEyebrow">CHORD DISPLAY</p>
+            <h2 id="rendererSettingsDialogTitle" data-i18n="rendererSettings">Settings</h2>
+          </div>
+          <button class="dialog-close" id="rendererSettingsClose" type="button" aria-label="Close settings" data-i18n-aria="closeRendererSettings">×</button>
+        </header>
+        <div class="renderer-settings-body">
+          <label class="renderer-setting-row">
+            <span data-i18n="settingsRendererScale">Score Font Scale</span>
+            <span class="renderer-scale-control">
+              <input id="rendererScale" type="range" min="50" max="300" step="5" value="100" data-i18n-aria="settingsRendererScale" />
+              <output id="rendererScaleValue" for="rendererScale">100%</output>
+            </span>
+          </label>
+          <label class="renderer-setting-row">
+            <span data-i18n="settingsRenderMode">Chord Symbol Style</span>
+            <select id="rendererRenderMode" class="renderer-render-mode-select">
+              <option value="normal" data-i18n="settingsRenderNormal">Normal</option>
+              <option value="camel" data-i18n="settingsRenderCamel">Camel</option>
+              <option value="superscript" data-i18n="settingsRenderSuperscript">All Superscript</option>
+            </select>
+          </label>
+            <label class="renderer-setting-row">
+              <span data-i18n="settingsDiminishedDisplay">Diminished chord display</span>
+              <select id="rendererDiminishedDisplay" class="renderer-render-mode-select" data-chord-quality-preference="diminishedDisplay">
+                <option value="dim">dim</option><option value="o">o</option>
+              </select>
+            </label>
+            <label class="renderer-setting-row">
+              <span data-i18n="settingsAugmentedDisplay">Augmented chord display</span>
+              <select id="rendererAugmentedDisplay" class="renderer-render-mode-select" data-chord-quality-preference="augmentedDisplay">
+                <option value="aug">aug</option><option value="+">+</option>
+              </select>
+            </label>
+            <label class="renderer-setting-row">
+              <span data-i18n="settingsMajorSeventhDisplay">Major seventh display</span>
+              <select id="rendererMajorSeventhDisplay" class="renderer-render-mode-select" data-chord-quality-preference="majorSeventhDisplay">
+                <option value="M">M</option><option value="ma">ma</option><option value="maj">maj</option><option value="triangle">△</option>
+              </select>
+            </label>
+            <label class="renderer-setting-row">
+              <span data-i18n="settingsMinorDisplay">Minor chord display</span>
+              <select id="rendererMinorDisplay" class="renderer-render-mode-select" data-chord-quality-preference="minorDisplay">
+                <option value="m">m</option><option value="mi">mi</option>
+              </select>
+            </label>
+            <label class="renderer-setting-row renderer-setting-toggle-row">
+              <span data-i18n="settingsAccidentalBeforeNote">Accidentals before note names</span>
+              <input id="rendererAccidentalBeforeNote" class="renderer-setting-checkbox" type="checkbox" />
+              <span class="renderer-setting-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="renderer-setting-row renderer-setting-toggle-row">
+              <span data-i18n="settingsChordDegrees">Show chord note names as degrees</span>
+              <input id="rendererChordDegrees" class="renderer-setting-checkbox" type="checkbox" />
+              <span class="renderer-setting-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="renderer-setting-row renderer-setting-toggle-row">
+              <span data-i18n="settingsMinorTonicSix">Use 6 for the minor tonic</span>
+              <input id="rendererMinorTonicSix" class="renderer-setting-checkbox" type="checkbox" disabled />
+              <span class="renderer-setting-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="renderer-setting-row renderer-setting-toggle-row">
+              <span data-i18n="settingsSharp9AsFlat10">Spell #9 as b10 in chord note names</span>
+            <input id="rendererSharp9AsFlat10" class="renderer-setting-checkbox" type="checkbox" />
+            <span class="renderer-setting-switch" aria-hidden="true"><span></span></span>
+          </label>
+          <label class="renderer-setting-row renderer-setting-toggle-row">
+            <span data-i18n="settingsDurationDisplayMode">Duration Display</span>
+            <span class="renderer-duration-control" id="rendererDurationControl" data-mode="fraction">
+              <span class="renderer-duration-choice renderer-duration-note" data-i18n="settingsDurationNote">Notes</span>
+              <input id="rendererDurationDisplayMode" class="renderer-setting-checkbox" type="checkbox" checked data-i18n-aria="settingsDurationDisplayMode" />
+              <span class="renderer-setting-switch" aria-hidden="true"><span></span></span>
+              <span class="renderer-duration-choice renderer-duration-fraction" data-i18n="settingsDurationFraction">Fractions</span>
+            </span>
+          </label>
+          <label class="renderer-setting-row">
+            <span data-i18n="settingsGlobalPlaybackOffset">Global Latency</span>
+            <span class="renderer-offset-setting">
+              <input id="rendererGlobalPlaybackOffset" type="text" inputmode="numeric" value="-30" data-i18n-aria="settingsGlobalPlaybackOffset" />
+              <span data-i18n="settingsMilliseconds">ms</span>
+            </span>
+          </label>
+          <section class="renderer-shortcut-settings" aria-labelledby="rendererShortcutHeading">
+            <h3 id="rendererShortcutHeading" data-i18n="settingsShortcuts">Playback Shortcuts</h3>
+            <label class="renderer-shortcut-row"><span data-i18n="settingsShortcutPlayPause">Play / Pause</span><input id="rendererShortcutPlayPause" type="text" readonly data-shortcut-action="playPause" data-i18n-placeholder="settingsShortcutUnset" /></label>
+            <label class="renderer-shortcut-row"><span data-i18n="settingsShortcutStop">Stop</span><input id="rendererShortcutStop" type="text" readonly data-shortcut-action="stop" data-i18n-placeholder="settingsShortcutUnset" /></label>
+          </section>
+          <div class="renderer-settings-status" id="rendererSettingsStatus" aria-live="polite"></div>
+        </div>
+      </div>
+    </dialog>
+    <dialog class="metadata-dialog comment-dialog" id="commentDialog" aria-labelledby="commentDialogTitle">
+      <div class="metadata-form">
+        <header class="metadata-dialog-header">
+          <div><p class="metadata-kicker">COMMENT</p><h2 id="commentDialogTitle" data-i18n="editComments">Edit Comments</h2><p data-i18n="commentsDescription">Comment bodies are stored outside MAIN and linked by number.</p></div>
+          <button class="dialog-close" id="commentDialogClose" type="button" data-i18n-aria="closeComments">×</button>
+        </header>
+        <div class="comment-list" id="commentList"></div>
+        <p class="comment-dialog-status" id="commentDialogStatus" aria-live="polite"></p>
+        <footer class="metadata-dialog-footer comment-dialog-footer">
+          <button class="dialog-secondary" id="commentAdd" type="button" data-i18n="addComment">Add Comment</button>
+          <button class="dialog-secondary" id="commentEdit" type="button" data-i18n="editComment">Edit Comment</button>
+          <button class="dialog-secondary" id="commentDelete" type="button" data-i18n="deleteComment">Delete Comment</button>
+          <span class="comment-footer-spacer"></span>
+          <button class="dialog-secondary" id="commentCancel" type="button" data-i18n="cancel">Cancel</button>
+          <button class="render-button" id="commentConfirm" type="button" data-i18n="confirmComments">Confirm</button>
+        </footer>
+      </div>
+    </dialog>
+    <dialog class="metadata-dialog comment-text-dialog" id="commentTextDialog" aria-labelledby="commentTextDialogTitle">
+      <form class="metadata-form" id="commentTextForm" novalidate>
+        <header class="metadata-dialog-header">
+          <div><p class="metadata-kicker">COMMENT</p><h2 id="commentTextDialogTitle" data-i18n="editComment">Edit Comment</h2></div>
+          <button class="dialog-close" id="commentTextClose" type="button" data-i18n-aria="closeComments">×</button>
+        </header>
+        <div class="metadata-fields">
+          <label class="metadata-field"><span class="metadata-field-label" data-i18n="commentLanguage">Language</span><select id="commentLanguage"><option value="zh_cn" data-i18n="commentLanguageZh">Simplified Chinese</option><option value="en" data-i18n="commentLanguageEn">English</option></select></label>
+          <label class="metadata-field"><span class="metadata-field-label" data-i18n="commentBody">Comment Text</span><textarea id="commentText" rows="10"></textarea></label>
+        </div>
+        <footer class="metadata-dialog-footer"><button class="dialog-secondary" id="commentTextCancel" type="button" data-i18n="cancel">Cancel</button><button class="render-button" type="submit" data-i18n="saveComment">Save Comment</button></footer>
+      </form>
+    </dialog>
+    <dialog class="settings-dialog" id="editorSettingsDialog" aria-labelledby="editorSettingsDialogTitle">
+      <form class="settings-form" method="dialog">
+        <header class="settings-dialog-header">
+          <div>
+            <p class="metadata-kicker">EDITOR</p>
+            <h2 id="editorSettingsDialogTitle" data-i18n="editorSettings">Editor Settings</h2>
+          </div>
+          <button class="dialog-close" id="editorSettingsClose" type="submit" aria-label="Close editor settings" data-i18n-aria="closeEditorSettings">×</button>
+        </header>
+        <div class="settings-fields">
+          <section class="editor-setting-row" id="startupDemoRow" hidden>
+            <div><h3 id="startupDemoLabel" data-i18n="openDemoOnStartup">Open DEMO File on Startup</h3></div>
+            <div class="setting-binary-control is-on" id="startupDemoControl">
+              <span class="switch-state-label" data-i18n="off">Off</span>
+              <button id="startupDemoButton" class="binary-switch" type="button" role="switch" aria-checked="true" aria-labelledby="startupDemoLabel">
+                <span class="binary-switch-knob" aria-hidden="true"></span>
+              </button>
+              <span class="switch-state-label" data-i18n="on">On</span>
+            </div>
+          </section>
+          <p id="startupDemoError" role="alert" hidden data-i18n="applicationPreferenceError"></p>
+          <section class="editor-setting-row">
+            <div>
+              <h3 id="lineNumberDisplayLabel" data-i18n="lineNumberDisplay">Line Number Display</h3>
+            </div>
+            <div class="setting-binary-control is-on" id="lineNumberModeControl">
+              <span class="switch-state-label" data-i18n="lineNumbers">Lines</span>
+              <button id="lineNumberModeSwitch" class="binary-switch" type="button" role="switch" aria-checked="true" aria-labelledby="lineNumberDisplayLabel">
+                <span class="binary-switch-knob" aria-hidden="true"></span>
+              </button>
+              <span class="switch-state-label" data-i18n="measureNumbers">Measures</span>
+            </div>
+          </section>
+          <section class="editor-setting-row">
+            <div>
+              <h3 id="autoWrapLabel" data-i18n="autoWrap">Word Wrap</h3>
+            </div>
+            <div class="setting-binary-control" id="autoWrapControl">
+              <span class="switch-state-label" data-i18n="off">Off</span>
+              <button id="autoWrapButton" class="binary-switch" type="button" role="switch" aria-checked="false" aria-labelledby="autoWrapLabel">
+                <span class="binary-switch-knob" aria-hidden="true"></span>
+              </button>
+              <span class="switch-state-label" data-i18n="on">On</span>
+            </div>
+          </section>
+          <section class="editor-setting-row">
+            <div><h3 id="romanWarningsLabel" data-i18n="romanWarnings">Roman Recommendations</h3></div>
+            <div class="setting-binary-control is-on" id="romanWarningsControl">
+              <span class="switch-state-label" data-i18n="off">Off</span>
+              <button id="romanWarningsButton" class="binary-switch" type="button" role="switch" aria-checked="true" aria-labelledby="romanWarningsLabel">
+                <span class="binary-switch-knob" aria-hidden="true"></span>
+              </button>
+              <span class="switch-state-label" data-i18n="on">On</span>
+            </div>
+          </section>
+        </div>
+        <footer class="settings-dialog-footer">
+          <button class="dialog-secondary" id="profileManagerButton" type="button" hidden data-i18n="profileManager">Rule Versions</button>
+          <button class="render-button" type="submit" data-i18n="done">Done</button>
+        </footer>
+      </form>
+    </dialog>
+    <dialog class="score-export-dialog" id="scoreExportDialog" aria-labelledby="scoreExportDialogTitle">
+      <form class="score-export-form">
+        <header class="score-export-header">
+          <div><p class="metadata-kicker">EXPORT</p><h2 id="scoreExportDialogTitle" data-i18n="scoreExportTitle">Export Score</h2></div>
+          <button class="dialog-close" id="scoreExportClose" type="button" aria-label="Close score export" data-i18n-aria="scoreExportClose">×</button>
+        </header>
+        <div class="score-export-body">
+          <aside class="score-export-controls">
+            <label><span data-i18n="scoreExportFormat">Format</span><select id="scoreExportFormat"><option value="pdf">PDF</option><option value="svg">SVG</option><option value="png">PNG</option><option value="jpg">JPG</option></select></label>
+            <label><span data-i18n="scoreExportOutputMode">Output</span><select id="scoreExportOutputMode"><option value="pages" data-i18n="scoreExportPages">Paginated</option><option value="continuous" data-i18n="scoreExportContinuous">Single Long Image</option></select></label>
+            <label id="scoreExportPngBackgroundField"><span data-i18n="scoreExportPngBackground">PNG Background</span><select id="scoreExportPngBackground"><option value="white" data-i18n="scoreExportBackgroundWhite">White</option><option value="transparent" data-i18n="scoreExportBackgroundTransparent">Transparent</option></select></label>
+            <label><span data-i18n="scoreExportPaper">Paper</span><select id="scoreExportPaper"><option value="a4">A4</option><option value="a3">A3</option><option value="letter">Letter</option></select></label>
+            <label><span data-i18n="scoreExportOrientation">Orientation</span><select id="scoreExportOrientation"><option value="portrait" data-i18n="scoreExportPortrait">Portrait</option><option value="landscape" data-i18n="scoreExportLandscape">Landscape</option></select></label>
+            <label><span data-i18n="scoreExportMargin">Margins</span><select id="scoreExportMargin"><option value="narrow" data-i18n="scoreExportMarginNarrow">Narrow · 10 mm</option><option value="standard" data-i18n="scoreExportMarginStandard">Standard · 15 mm</option><option value="wide" data-i18n="scoreExportMarginWide">Wide · 20 mm</option></select></label>
+            <label class="score-export-scale" id="scoreExportFillThresholdField"><span data-i18n="scoreExportFillThreshold">Vertical Fill Threshold</span><input id="scoreExportFillThreshold" type="range" min="50" max="100" step="5" value="85" /><output id="scoreExportFillThresholdValue">85%</output></label>
+            <label class="score-export-scale"><span data-i18n="scoreExportScale">Score Scale</span><input id="scoreExportScale" type="range" min="75" max="150" step="5" value="100" /><output id="scoreExportScaleValue">100%</output></label>
+            <button class="dialog-secondary" id="scoreExportScaleReset" type="button" data-i18n="scoreExportScaleReset">Reset to 100%</button>
+          </aside>
+          <section class="score-export-preview" aria-label="Export preview" data-i18n-aria="scoreExportPreview">
+            <nav class="score-export-preview-toolbar" aria-label="Export preview controls" data-i18n-aria="scoreExportPreviewControls">
+              <button id="scoreExportPrevious" type="button" aria-label="Previous page" data-i18n-aria="scoreExportPrevious">‹</button>
+              <output id="scoreExportPageCount">0 / 0</output>
+              <button id="scoreExportNext" type="button" aria-label="Next page" data-i18n-aria="scoreExportNext">›</button>
+              <span class="score-export-toolbar-spacer"></span>
+              <button id="scoreExportFit" type="button" aria-pressed="true" data-i18n="scoreExportFit">Fit</button>
+              <button id="scoreExportActual" type="button" aria-pressed="false" data-i18n="scoreExportActual">100%</button>
+            </nav>
+            <div class="score-export-preview-scroll" id="scoreExportPreviewScroll">
+              <div class="score-export-preview-stage" id="scoreExportPreviewStage"><div id="scoreExportPages"></div></div>
+            </div>
+          </section>
+        </div>
+        <footer class="score-export-footer">
+          <p class="score-export-status" id="scoreExportStatus" aria-live="polite"></p>
+          <button class="dialog-secondary" id="scoreExportCancel" type="button" data-i18n="cancel">Cancel</button>
+          <button class="render-button" id="scoreExportSubmit" type="submit" disabled data-i18n="scoreExportSubmit">Export</button>
+        </footer>
+        <div class="score-export-measure-root" id="scoreExportMeasureRoot" aria-hidden="true"></div>
+      </form>
+    </dialog>
+    <dialog class="chord-popover" id="chordPopover" aria-labelledby="chordPopoverHeading">
+      <header class="chord-popover-header">
+        <div>
+          <p class="chord-popover-kicker" data-i18n="chordDetails">Chord Details</p>
+          <h2 id="chordPopoverHeading"><span id="chordPopoverSymbol"></span></h2>
+        </div>
+        <button class="chord-popover-close" id="chordPopoverClose" type="button" aria-label="Close chord details" data-i18n-aria="closeChordDetails">×</button>
+      </header>
+      <div class="chord-popover-body">
+        <dl class="chord-popover-results">
+          <div><dt data-i18n="chordIntervalQuality">Chord Interval Quality</dt><dd id="chordPopoverIntervals"></dd></div>
+          <div><dt data-i18n="chordNoteNames">Chord Note Names</dt><dd id="chordPopoverNoteNames"></dd></div>
+        </dl>
+        <figure class="chord-popover-staff">
+          <figcaption data-i18n="chordStaff">Staff</figcaption>
+          <div class="chord-popover-staff-canvas" id="chordPopoverStaff" role="img"></div>
+          <p class="chord-popover-message" id="chordPopoverStaffError" role="alert" hidden data-i18n="chordStaffFailed">Unable to render the staff.</p>
+        </figure>
+      </div>
+      <footer class="chord-popover-footer">
+        <p class="chord-popover-message" id="chordPopoverAudioError" role="alert" hidden data-i18n="chordAudioFailed">Unable to load the piano samples. Check your connection and try again.</p>
+        <button class="chord-popover-play" id="chordPopoverPlay" type="button"><span class="chord-play-icon" aria-hidden="true">♪</span><span id="chordPopoverPlayLabel" data-i18n="playChord">Play Chord</span></button>
+      </footer>
+    </dialog>
+    <dialog class="roman-popover" id="romanPopover" aria-labelledby="romanPopoverHeading">
+      <header class="roman-popover-header">
+        <div>
+          <p class="roman-popover-kicker" data-i18n="romanDetails">Roman Numeral Details</p>
+          <h2 id="romanPopoverHeading"><span id="romanPopoverSymbol"></span></h2>
+        </div>
+        <button class="roman-popover-close" id="romanPopoverClose" type="button" aria-label="Close Roman numeral details" data-i18n-aria="closeRomanDetails">×</button>
+      </header>
+      <dl class="roman-popover-results">
+        <div><dt data-i18n="romanStructure">Roman Scale-Degree Structure</dt><dd id="romanPopoverStructure"></dd></div>
+      </dl>
+    </dialog>
+    <dialog class="comment-popover" id="commentPopover" aria-labelledby="commentPopoverHeading">
+      <header class="comment-popover-header"><div><p class="comment-popover-kicker">COMMENT</p><h2 id="commentPopoverHeading"></h2><p class="comment-popover-language" id="commentPopoverLanguage"></p></div><button class="comment-popover-close" id="commentPopoverClose" type="button" data-i18n-aria="closeComment">×</button></header>
+      <p class="comment-popover-body" id="commentPopoverBody"></p>
+    </dialog>
+    <style id="scoreExportPrintStyle"></style>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

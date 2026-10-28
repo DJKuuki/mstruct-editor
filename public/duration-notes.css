@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "Bravura Duration";
+  src: url("./fonts/Bravura.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Bravura";
+  src: url("./fonts/Bravura.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
+.duration-label.duration-notes { margin-block-start: .5em; font-weight: 400; }
+.score-system.has-note-durations { --duration-content-extra: 1.8375em; }
+.score-system.has-note-durations.has-comments .duration-label.duration-notes { margin-block-end: -1.3em; }
+/* With no COMMENT or tuplet number below the notes, the note font's foot room
+   must not create an empty lane before the first tag. Keep the system's outer
+   breathing room by reducing its added height by the same 1 * .875 em. */
+.score-system.has-note-durations.has-tags:not(.has-comments):not(:has(.duration-note-tuplet)) { --duration-content-extra: .9625em; }
+.score-system.has-note-durations.has-tags:not(.has-comments):not(:has(.duration-note-tuplet)) .duration-label.duration-notes { margin-block-end: -1em; }
+.duration-note-sequence { display: inline-flex; align-items: flex-start; justify-content: center; gap: .18em; }
+.duration-note { position: relative; display: inline-flex; align-items: flex-end; min-block-size: 2.6em; padding-block-end: .55em; white-space: nowrap; }
+.duration-note-glyph { font: 400 2.2em/1 "Bravura Duration"; }
+.duration-note-dots { display: inline-flex; align-items: center; align-self: flex-end; gap: 4px; block-size: 0; min-block-size: 0; margin-inline-start: .25em; translate: 0 -1em; }
+.duration-note-dot { display: block; flex: 0 0 4px; block-size: 4px; border-radius: 50%; background: currentColor; }
+.duration-note-tuplet { position: absolute; inset-block-end: 0; inset-inline-start: 50%; translate: -50% 25%; font: 400 1.75em/1 "Bravura Duration"; white-space: nowrap; }
+.duration-note-multiplier { align-self: flex-end; padding-block-end: .55em; font: 600 .9em/1 "Crimson Pro", Georgia, serif; white-space: nowrap; }

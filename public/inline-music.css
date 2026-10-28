@@ -1,0 +1,20 @@
+@font-face {
+  font-family: "Crimson Pro";
+  src: url("./fonts/CrimsonPro-Latin-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* Inline boxes participate in the surrounding line box, including tall figures. */
+.mstruct-inline { display: inline-block; max-inline-size: 100%; vertical-align: baseline; font-size: 1em; font-style: normal; line-height: 1.2; white-space: nowrap; cursor: inherit; }
+.mstruct-inline-chord { font-family: "MStruct Text Accidentals", "Academico", "Times New Roman", serif; font-weight: 400; }
+/* Crimson Pro has a smaller cap height than prose fonts. Keep its glyphs and
+   all internal ratios, with one optical scale for the complete inline symbol. */
+.mstruct-inline-roman { font-family: "MStruct Text Accidentals", "Crimson Pro", Georgia, serif; font-size: 1.2em; font-weight: 600; }
+.mstruct-inline > .score-chord-symbol { font-size: 1em; }
+/* A flex baseline comes from the Roman base. A four-row stack increases both
+   ascent and descent while retaining that baseline and all existing ratios. */
+.mstruct-inline > .score-roman-symbol { font-size: 1em; }
+.mstruct-inline .score-roman-figures:not(.is-single):not(.has-sus) { align-self: center; }
+.mstruct-inline-invalid { color: #a1544d; white-space: pre-wrap; overflow-wrap: anywhere; }

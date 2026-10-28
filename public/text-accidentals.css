@@ -1,0 +1,9 @@
+/* Text-only glyph positions. Staff engraving continues to use Bravura. */
+@font-face {
+  font-family: "MStruct Text Accidentals";
+  src: url("./fonts/MStructTextAccidentals.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+266D-266F, U+1D12A-1D12B;
+}

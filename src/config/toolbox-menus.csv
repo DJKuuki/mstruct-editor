@@ -1,0 +1,15 @@
+一级菜单id,二级菜单id,中文名,英文名
+1,,基础设置,Basic Settings
+2,,基础事件,Basic Events
+3,,调性,Tonalities
+4,,音阶,Scales
+5,,终止式,Cadences
+6,,和弦进行,Chord Progressions
+8,,曲式,Forms
+8,1,简单曲式,Simple Forms
+8,2,奏鸣曲式,Sonata Form
+8,3,主歌-副歌式,Verse-Chorus Form
+8,4,主段-桥部式,Strophe-Bridge Form
+8,5,分节歌式,Strophic Form
+8,6,EDM曲式,EDM Form
+8,7,曲式控制,Form Controls

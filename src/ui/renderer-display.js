@@ -1,0 +1,52 @@
+import { setupRendererSettings } from "./renderer-settings.js";
+import { RENDERER_PREFERENCES_STORAGE_KEY } from "../core/renderer-preferences.js";
+import { DEFAULT_RENDERER_SCALE, SCORE_BASE_FONT_SIZE, normalizeRendererScale,
+  getRendererScaleSnapshot, writeRendererScale, subscribeRendererScale } from "../core/renderer-scale.js";
+
+/** Display state and settings routing; score/export document state stays outside. */
+export function setupRendererDisplay({ canvas, hostedMode, getPreferences, updatePreferences, refreshLayout, postToHost, tr }) {
+  let scale = hostedMode ? DEFAULT_RENDERER_SCALE : getRendererScaleSnapshot();
+  const applySize = () => canvas.style.setProperty("--score-font-size", `${SCORE_BASE_FONT_SIZE * scale / 100}px`);
+  applySize();
+
+  function setScale(value) {
+    const next = normalizeRendererScale(value);
+    if (next === scale) return;
+    scale = next;
+    applySize();
+    refreshLayout();
+  }
+
+  const unsubscribe = hostedMode ? () => {} : subscribeRendererScale(() => setScale(getRendererScaleSnapshot()));
+  let canvasWidth = canvas.clientWidth;
+  const resizeObserver = new ResizeObserver(() => {
+    const nextWidth = canvas.clientWidth;
+    if (Math.abs(nextWidth - canvasWidth) < 1) return;
+    canvasWidth = nextWidth;
+    refreshLayout();
+  });
+  resizeObserver.observe(canvas);
+  setupRendererSettings({
+    getScale: () => scale,
+    updateScale: (next) => {
+      if (!hostedMode) writeRendererScale(next);
+      else {
+        setScale(next);
+        postToHost("renderer-scale", { rendererScale: scale });
+      }
+    },
+    openHostSettings: () => {
+      if (!hostedMode || document.fullscreenElement || document.body.classList.contains("renderer-fullscreen-external")) return false;
+      postToHost("open-settings");
+      return true;
+    },
+    getPreferences,
+    updatePreferences: (next) => {
+      updatePreferences(next);
+      if (hostedMode) postToHost("chord-preferences-update", { chordPreferences: getPreferences() });
+    },
+    storageKey: hostedMode ? null : RENDERER_PREFERENCES_STORAGE_KEY,
+    tr,
+  });
+  return { getScale: () => scale, setScale, destroy: () => { unsubscribe(); resizeObserver.disconnect(); } };
+}

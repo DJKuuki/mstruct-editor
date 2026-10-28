@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.mstruct text eol=crlf
+*.png binary
+*.ico binary
+*.woff2 binary
+*.ttf binary
+desktop/assets/soundfonts/*.js -text
+public/soundfonts/*.js -text
+desktop/assets/licenses/CC-BY-SA-3.0.txt -text
+public/licenses/CC-BY-SA-3.0.txt -text

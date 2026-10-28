@@ -1,0 +1,22 @@
+/* Application chrome only. Score notation, playback and review states retain their semantic colors. */
+[data-app-color-scheme="ink-blue"] {
+  --ink: #202941; --muted: #68738a; --line: #d8dfeb; --paper: #f3f5fa;
+  --card: #ffffff; --accent: #b8caf2; --deep: #2e4479; --soft: #e5eaf5;
+  --ui-hover: #eaf0fa; --ui-border: #c4cede; --ui-text: #4e5e7d;
+  --ui-faint: #8894aa; --ui-link: #5874ab; --ui-button-hover: #223662;
+  --ui-panel: #eaf0f8; --ui-panel-soft: #fafbfd; --ui-shadow-rgb: 38, 60, 114;
+}
+[data-app-color-scheme="green"] {
+  --ink: #19221f; --muted: #718079; --line: #dfe7e1; --paper: #f7f9f5;
+  --card: #ffffff; --accent: #c8f36d; --deep: #283b36; --soft: #e9f0e9;
+  --ui-hover: #eef4eb; --ui-border: #cad7ce; --ui-text: #52635a;
+  --ui-faint: #9aa69f; --ui-link: #6d8e58; --ui-button-hover: #1e302b;
+  --ui-panel: #f0f4ef; --ui-panel-soft: #fbfcfa; --ui-shadow-rgb: 39, 63, 48;
+}
+[data-app-color-scheme="terracotta"] {
+  --ink: #3b2d29; --muted: #867268; --line: #e1d5c8; --paper: #f7f1e9;
+  --card: #fffcf7; --accent: #edc1a7; --deep: #984e3c; --soft: #efe0d4;
+  --ui-hover: #f1e5d9; --ui-border: #d8c4b4; --ui-text: #796057;
+  --ui-faint: #a28b7c; --ui-link: #a35e45; --ui-button-hover: #803e2f;
+  --ui-panel: #f0e6da; --ui-panel-soft: #fbf7f1; --ui-shadow-rgb: 102, 61, 35;
+}

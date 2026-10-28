@@ -1,0 +1,8 @@
+token,append_degree,requires_seventh,seventh_override,allowed_figured_bass
+,5,,none,"6,64,7,65,43,42,7b5,sus,7sus,7b5sus,[]"
++,#5,,7,"6,64,7,65,43,42,sus,7sus"
+o,b5,,bb7,"6,64,7,65,43,42"
+ho,b5,True,b7,"6,64,7,65,43,42"
+DM,5,True,b7,"6,64,7,65,43,42,7b5,sus,7sus,7b5sus"
+oM,b5,True,7,"7,65,43,42"
+M,5,True,7,"7,sus,7sus,7b5sus,65,43,42"

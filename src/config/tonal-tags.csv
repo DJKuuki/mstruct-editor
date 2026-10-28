@@ -1,0 +1,39 @@
+token,mode_zh_name,scale_zh_name,mode_en_name,scale_en_name
+<WholeTone:>,全音阶调式：{note},全音阶：{note},Whole Tone Mode: {note},Whole Tone Scale: {note}
+<Hexatonic:>,六声音阶调式：{note},六声音阶：{note},Hexatonic Mode: {note},Hexatonic Scale: {note}
+<Octatonic:>,八声音阶调式：{note},八声音阶：{note},Octatonic Mode: {note},Octatonic Scale: {note}
+<MoLT3:>,有限移位调式3：{note},有限移位音阶3：{note},Mode of Limited Transpositions 3: {note},Mode of Limited Transpositions Scale 3: {note}
+<MoLT4:>,有限移位调式4：{note},有限移位音阶4：{note},Mode of Limited Transpositions 4: {note},Mode of Limited Transpositions Scale 4: {note}
+<MoLT5:>,有限移位调式5：{note},有限移位音阶5：{note},Mode of Limited Transpositions 5: {note},Mode of Limited Transpositions Scale 5: {note}
+<MoLT6:>,有限移位调式6：{note},有限移位音阶6：{note},Mode of Limited Transpositions 6: {note},Mode of Limited Transpositions Scale 6: {note}
+<MoLT7:>,有限移位调式7：{note},有限移位音阶7：{note},Mode of Limited Transpositions 7: {note},Mode of Limited Transpositions Scale 7: {note}
+<GongPentatonic:>,宫五声调式：{note},宫五声音阶：{note},Gong Pentatonic Mode: {note},Gong Pentatonic Scale: {note}
+<ShangPentatonic:>,商五声调式：{note},商五声音阶：{note},Shang Pentatonic Mode: {note},Shang Pentatonic Scale: {note}
+<JuePentatonic:>,角五声调式：{note},角五声音阶：{note},Jue Pentatonic Mode: {note},Jue Pentatonic Scale: {note}
+<ZhiPentatonic:>,徵五声调式：{note},徵五声音阶：{note},Zhi Pentatonic Mode: {note},Zhi Pentatonic Scale: {note}
+<YuPentatonic:>,羽五声调式：{note},羽五声音阶：{note},Yu Pentatonic Mode: {note},Yu Pentatonic Scale: {note}
+<Miyakobushi:>,都节调式：{note},都节音阶：{note},Miyakobushi Mode: {note},Miyakobushi Scale: {note}
+<Ryukyu:>,琉球调式：{note},琉球音阶：{note},Ryukyu Mode: {note},Ryukyu Scale: {note}
+<Ionian:>,爱奥尼亚调式：{note},爱奥尼亚音阶：{note},Ionian Mode: {note},Ionian Scale: {note}
+<Melodic_Minor:>,旋律小调调式：{note},旋律小调音阶：{note},Melodic Minor Mode: {note},Melodic Minor Scale: {note}
+<Dorian:>,多利亚调式：{note},多利亚音阶：{note},Dorian Mode: {note},Dorian Scale: {note}
+<Dorianb2:>,多利亚b2调式：{note},多利亚b2音阶：{note},Dorianb2 Mode: {note},Dorianb2 Scale: {note}
+<Phrygian:>,弗里吉亚调式：{note},弗里吉亚音阶：{note},Phrygian Mode: {note},Phrygian Scale: {note}
+<PhrygianDominant:>,大弗里吉亚调式：{note},大弗里吉亚音阶：{note},Phrygian Dominant Mode: {note},Phrygian Dominant Scale: {note}
+<Lydian:>,利底亚调式：{note},利底亚音阶：{note},Lydian Mode: {note},Lydian Scale: {note}
+<Lydian#5:>,利底亚#5调式：{note},利底亚#5音阶：{note},Lydian#5 Mode: {note},Lydian#5 Scale: {note}
+<Lydianb7:>,利底亚b7调式：{note},利底亚b7音阶：{note},Lydianb7 Mode: {note},Lydianb7 Scale: {note}
+<Mixolydian:>,混合利底亚调式：{note},混合利底亚音阶：{note},Mixolydian Mode: {note},Mixolydian Scale: {note}
+<Aeolian:>,伊奥利亚调式：{note},伊奥利亚音阶：{note},Aeolian Mode: {note},Aeolian Scale: {note}
+<Melodic_Major:>,旋律大调调式：{note},旋律大调音阶：{note},Melodic Major Mode: {note},Melodic Major Scale: {note}
+<Locrian:>,洛克里亚调式：{note},洛克里亚音阶：{note},Locrian Mode: {note},Locrian Scale: {note}
+<Locriann2:>,洛克里亚n2调式：{note},洛克里亚n2音阶：{note},Locriann2 Mode: {note},Locriann2 Scale: {note}
+<SuperLocrian:>,超级洛克里亚调式：{note},超级洛克里亚音阶：{note},Super Locrian Mode: {note},Super Locrian Scale: {note}
+<AlteredScale:>,,变化音阶：{note},,Altered Scale: {note}
+<HarmonicMinor:>,和声小调调式：{note},和声小调音阶：{note},Harmonic Minor Mode: {note},Harmonic Minor Scale: {note}
+<HarmonicMajor:>,和声大调调式：{note},和声大调音阶：{note},Harmonic Major Mode: {note},Harmonic Major Scale: {note}
+<DoubleHarmonicMajor:>,双和声大调调式：{note},双和声大调音阶：{note},Double Harmonic Major Mode: {note},Double Harmonic Major Scale: {note}
+<MixedBluesScale:>,,混合布鲁斯音阶：{note},,Mixed Blues Scale: {note}
+<MinorBluesScale:>,,小调布鲁斯音阶：{note},,Minor Blues Scale: {note}
+<MajorBluesScale:>,,大调布鲁斯音阶：{note},,Major Blues Scale: {note}
+<BebopScale:>,,Bebop音阶：{note},,Bebop Scale: {note}

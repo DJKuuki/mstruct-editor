@@ -1,0 +1,208 @@
+插入内容,光标位置,中文名,英文名,一级菜单id,二级菜单id
+{BN:},-2,小节号,Bar Number,1,
+{TS:},-2,拍号,Time Signature,1,
+{D:},-2,时值,Division,1,
+{TC:},-2,调性中心,Tonal Center,1,
+{TEMPO:},-2,速度记号,Tempo Markings,1,
+{BPM:},-2,BPM,BPM,1,
+{BPMhidden:},-2,隐式BPM,Hidden BPM,1,
+{T=},-2,时间戳,Timestamp,1,
+[C:|R:],3,和弦,Chord,2,
+[NR:],-2,新里曼变换,Neo-Riemannian Transformation,2,
+{M:}{/M},3,转调,Modulation,2,
+{MH:},-2,强行转调,Forced Modulation,2,
+[COMMENT:][/COMMENT],9,注释,Comment,2,
+X,-1,占位符,Placeholder,2,
+0,-1,休止符,Rest,2,
+-,-1,延长符,Hold,2,
+N.C.,-1,无和弦,No Chord,2,
+Clus,-1,音块,Cluster,2,
+ClusWK,-1,白键音块,White Key Cluster,2,
+ClusBK,-1,黑键音块,Black Key Cluster,2,
+...,-1,省略,Ellipsis,2,
+{LB},-1,换行,Line Break,2,
+{:||},-1,右反复记号,Right Repeat Sign,2,
+{||:},-1,左反复记号,Left Repeat Sign,2,
+{ENDING:}{/ENDING},8,不同结尾,Different Endings,2,
+{||},-1,双小节线,Double Barline,2,
+[F:||],3,曲式记号,Form Marker,2,
+{MM:},-2,节奏转换,Metric Modulation,2,
+</Atonality>,-1,无调性,Atonality,3,
+</Polytonality>,-1,多调性,Polytonality,3,
+<Centricity:></Centricity>,12,中心性,Centricity,3,
+</Pantriadic>,-1,泛三和弦,Pantriadic,3,
+</Tonality>,-1,调性,Tonality,3,
+</Modality>,-1,调式性,Modality,3,
+<Mode_WholeTone:></Mode_WholeTone>,16,全音阶调式,Whole Tone Mode,3,
+<Mode_Hexatonic:></Mode_Hexatonic>,16,六声音阶调式,Hexatonic Mode,3,
+<Mode_Octatonic:></Mode_Octatonic>,16,八声音阶调式,Octatonic Mode,3,
+<Mode_MoLT3:></Mode_MoLT3>,12,有限移位调式3,Mode of Limited Transpositions 3,3,
+<Mode_MoLT4:></Mode_MoLT4>,12,有限移位调式4,Mode of Limited Transpositions 4,3,
+<Mode_MoLT5:></Mode_MoLT5>,12,有限移位调式5,Mode of Limited Transpositions 5,3,
+<Mode_MoLT6:></Mode_MoLT6>,12,有限移位调式6,Mode of Limited Transpositions 6,3,
+<Mode_MoLT7:></Mode_MoLT7>,12,有限移位调式7,Mode of Limited Transpositions 7,3,
+<Mode_GongPentatonic:></Mode_GongPentatonic>,21,宫五声调式,Gong Pentatonic Mode,3,
+<Mode_ShangPentatonic:></Mode_ShangPentatonic>,22,商五声调式,Shang Pentatonic Mode,3,
+<Mode_JuePentatonic:></Mode_JuePentatonic>,20,角五声调式,Jue Pentatonic Mode,3,
+<Mode_ZhiPentatonic:></Mode_ZhiPentatonic>,20,徵五声调式,Zhi Pentatonic Mode,3,
+<Mode_YuPentatonic:></Mode_YuPentatonic>,19,羽五声调式,Yu Pentatonic Mode,3,
+<Mode_Miyakobushi:></Mode_Miyakobushi>,18,都节调式,Miyakobushi Mode,3,
+<Mode_Ryukyu:></Mode_Ryukyu>,13,琉球调式,Ryukyu Mode,3,
+<Mode_Ionian:></Mode_Ionian>,13,爱奥尼亚调式,Ionian Mode,3,
+<Mode_Melodic_Minor:></Mode_Melodic_Minor>,20,旋律小调调式,Melodic Minor Mode,3,
+<Mode_Dorian:></Mode_Dorian>,13,多利亚调式,Dorian Mode,3,
+<Mode_Dorianb2:></Mode_Dorianb2>,15,多利亚降2调式,Dorian-flat-2 Mode,3,
+<Mode_Phrygian:></Mode_Phrygian>,15,弗里吉亚调式,Phrygian Mode,3,
+<Mode_PhrygianDominant:></Mode_PhrygianDominant>,23,大弗里吉亚调式,Phrygian Dominant Mode,3,
+<Mode_Lydian:></Mode_Lydian>,13,利底亚调式,Lydian Mode,3,
+<Mode_Lydian#5:></Mode_Lydian#5>,15,利底亚调式升5,Lydian-sharp-5 Mode,3,
+<Mode_Lydianb7:></Mode_Lydianb7>,15,利底亚调式降7,Lydian-flat-7 Mode,3,
+<Mode_Mixolydian:></Mode_Mixolydian>,17,混合利底亚调式,Mixolydian Mode,3,
+<Mode_Aeolian:></Mode_Aeolian>,14,伊奥利亚调式,Aeolian Mode,3,
+<Mode_Melodic_Major:></Mode_Melodic_Major>,20,旋律大调调式,Melodic Major Mode,3,
+<Mode_Locrian:></Mode_Locrian>,14,洛克里亚调式,Locrian Mode,3,
+<Mode_Locriann2:></Mode_Locriann2>,16,洛克里亚调式还原2,Locrian-natural-2 Mode,3,
+<Mode_SuperLocrian:></Mode_SuperLocrian>,19,超级洛克里亚调式,Super Locrian Mode,3,
+<Mode_HarmonicMinor:></Mode_HarmonicMinor>,20,和声小调调式,Harmonic Minor Mode,3,
+<Mode_HarmonicMajor:></Mode_HarmonicMajor>,20,和声大调调式,Harmonic Major Mode,3,
+<Mode_DoubleHarmonicMajor:></Mode_DoubleHarmonicMajor>,26,双和声大调调式,Double Harmonic Major Mode,3,
+<Scale_WholeTone:></Scale_WholeTone>,17,全音阶,Whole Tone Scale,4,
+<Scale_Hexatonic:></Scale_Hexatonic>,17,六声音阶,Hexatonic Scale,4,
+<Scale_Octatonic:></Scale_Octatonic>,17,八声音阶,Octatonic Scale,4,
+<Scale_MoLT3:></Scale_MoLT3>,13,有限移位音阶3,Mode of Limited Transpositions 3 Scale,4,
+<Scale_MoLT4:></Scale_MoLT4>,13,有限移位音阶4,Mode of Limited Transpositions 4 Scale,4,
+<Scale_MoLT5:></Scale_MoLT5>,13,有限移位音阶5,Mode of Limited Transpositions 5 Scale,4,
+<Scale_MoLT6:></Scale_MoLT6>,13,有限移位音阶6,Mode of Limited Transpositions 6 Scale,4,
+<Scale_MoLT7:></Scale_MoLT7>,13,有限移位音阶7,Mode of Limited Transpositions 7 Scale,4,
+<Scale_GongPentatonic:></Scale_GongPentatonic>,22,宫五声音阶,Gong Pentatonic Scale,4,
+<Scale_ShangPentatonic:></Scale_ShangPentatonic>,23,商五声音阶,Shang Pentatonic Scale,4,
+<Scale_JuePentatonic:></Scale_JuePentatonic>,21,角五声音阶,Jue Pentatonic Scale,4,
+<Scale_ZhiPentatonic:></Scale_ZhiPentatonic>,21,徵五声音阶,Zhi Pentatonic Scale,4,
+<Scale_YuPentatonic:></Scale_YuPentatonic>,20,羽五声音阶,Yu Pentatonic Scale,4,
+<Scale_Miyakobushi:></Scale_Miyakobushi>,19,都节音阶,Miyakobushi Scale,4,
+<Scale_Ryukyu:></Scale_Ryukyu>,14,琉球音阶,Ryukyu Scale,4,
+<Scale_Ionian:></Scale_Ionian>,14,爱奥尼亚音阶,Ionian Scale,4,
+<Scale_Melodic_Minor:></Scale_Melodic_Minor>,21,旋律小调音阶,Melodic Minor Scale,4,
+<Scale_Dorian:></Scale_Dorian>,14,多利亚音阶,Dorian Scale,4,
+<Scale_Dorianb2:></Scale_Dorianb2>,16,多利亚降2音阶,Dorian-flat-2 Scale,4,
+<Scale_Phrygian:></Scale_Phrygian>,16,弗里吉亚音阶,Phrygian Scale,4,
+<Scale_PhrygianDominant:></Scale_PhrygianDominant>,24,大弗里吉亚音阶,Phrygian Dominant Scale,4,
+<Scale_Lydian:></Scale_Lydian>,14,利底亚音阶,Lydian Scale,4,
+<Scale_Lydian#5:></Scale_Lydian#5>,16,利底亚升5音阶,Lydian-sharp-5 Scale,4,
+<Scale_Lydianb7:></Scale_Lydianb7>,16,利底亚降7音阶,Lydian-flat-7 Scale,4,
+<Scale_Mixolydian:></Scale_Mixolydian>,18,混合利底亚音阶,Mixolydian Scale,4,
+<Scale_Aeolian:></Scale_Aeolian>,15,伊奥利亚音阶,Aeolian Scale,4,
+<Scale_Melodic_Major:></Scale_Melodic_Major>,21,旋律大调音阶,Melodic Major Scale,4,
+<Scale_Locrian:></Scale_Locrian>,15,洛克里亚音阶,Locrian Scale,4,
+<Scale_Locriann2:></Scale_Locriann2>,17,洛克里亚还原2音阶,Locrian-natural-2 Scale,4,
+<Scale_SuperLocrian:></Scale_SuperLocrian>,20,超级洛克里亚音阶,Super Locrian Scale,4,
+<Scale_AlteredScale:></Scale_AlteredScale>,20,变化音阶,Altered Scale,4,
+<Scale_HarmonicMinor:></Scale_HarmonicMinor>,21,和声小调音阶,Harmonic Minor Scale,4,
+<Scale_HarmonicMajor:></Scale_HarmonicMajor>,21,和声大调音阶,Harmonic Major Scale,4,
+<Scale_DoubleHarmonicMajor:></Scale_DoubleHarmonicMajor>,27,双和声大调音阶,Double Harmonic Major Scale,4,
+<Scale_MixedBluesScale:></Scale_MixedBluesScale>,23,混合布鲁斯音阶,Mixed Blues Scale,4,
+<Scale_MinorBluesScale:></Scale_MinorBluesScale>,23,小调布鲁斯音阶,Minor Blues Scale,4,
+<Scale_MajorBluesScale:></Scale_MajorBluesScale>,23,大调布鲁斯音阶,Major Blues Scale,4,
+<Scale_BebopScale:></Scale_BebopScale>,18,Bebop音阶,Bebop Scale,4,
+</PAC>,-1,PAC（完全正格终止）,PAC,5,
+</IAC:not_tonic>,-1,IAC（不完全正格终止）：高音不是主音,IAC: Soprano isn't Tonic,5,
+</IAC:inverted>,-1,IAC（不完全正格终止）：转位和弦,IAC: Inverted Chord,5,
+</IAC:viio>,-1,IAC（不完全正格终止）：viio,IAC: viio,5,
+</HC>,-1,HC（半终止）,HC,5,
+</HC:Phrygian>,-1,弗里吉亚半终止,Phrygian HC,5,
+</HC-PAC>,-1,HC-PAC（半终止-完全正格终止）,HC-PAC,5,
+</HC-IAC>,-1,HC-IAC（半终止-不完全正格终止）,HC-IAC,5,
+</DC:>,-2,DC（阻碍终止）,DC,5,
+</PC:>,-2,PC（教会终止）,PC:,5,
+</EC>,-1,EC（回避终止）,EC,5,
+</Picardy_Third>,-1,皮卡迪三度,Picardy Third,5,
+</Minor_Dominant_Cadence>,-1,小属终止,Minor Dominant Cadence,5,
+</Backdoor_Cadence>,-1,后门终止,Backdoor Cadence,5,
+</Aeolian_Cadence>,-1,伊奥利亚终止,Aeolian Cadence,5,
+</Mario_Cadence>,-1,马里奥终止,Mario Cadence,5,
+</Aeolian_Cadence:minor>,-1,小三和弦伊奥利亚终止,Minor Aeolian Cadence,5,
+</Phrygian_Cadence_to_Tonic:>,-1,主音弗里吉亚终止,Phrygian Cadence to Tonic:,5,
+</Tritone_Cadence>,-1,三全音终止,Tritone Cadence,5,
+</Mediant_Cadence:>,-2,中音终止,Mediant Cadence:,5,
+<Descending_Line_Cliche></Descending_Line_Cliche>,24,半音下行,Descending Line Cliche,6,
+<Ascending_Line_Cliche></Ascending_Line_Cliche>,23,半音上行,Ascending Line Cliche,6,
+<Omnibus_Progression></Omnibus_Progression>,21,Omnibus进行,Omnibus Progression,6,
+<Coltrane_Changes></Coltrane_Changes>,18,柯川变换,Coltrane Changes,6,
+<Constant_Structure></Constant_Structure>,20,恒定结构,Constant Structure,6,
+<4536251></4536251>,9,王道进行（4-5-3-6-2-5-1）,Odo Shinko (4-5-3-6-2-5-1),6,
+<4536251V></4536251V>,10,王道进行（4-5-3-6-2-5-1）变体,Odo Shinko (4-5-3-6-2-5-1) Variant,6,
+<Seq:></Seq>,5,模进,Sequence,6,
+<SeqInv:></SeqInv>,8,有转位和弦的模进,Sequence with Inverted Chords,6,
+</Canon>,-1,卡农,Canon,8,1
+</Fugue>,-1,赋格,Fugue,8,1
+</Binary_Form>,-1,二部曲式,Binary Form,8,1
+</Ternary_Form>,-1,三部曲式,Ternary Form,8,1
+</Rondo_Form>,-1,回旋曲式,Rondo Form,8,1
+</Arch_Form>,-1,拱形曲式,Arch Form,8,1
+</Variation_Form>,-1,变奏曲式,Theme and Variation Form,8,1
+<12_Bar_Blues></12_Bar_Blues>,14,12小节蓝调,12 Bar Blues,8,1
+<16_Bar_Blues></16_Bar_Blues>,14,16小节蓝调,16 Bar Blues,8,1
+</Sonata_Form>,-1,奏鸣曲式,Sonata Form,8,2
+</Sonata_Form:E_Intro>,-1,奏鸣曲式：引子,Sonata Form: Intro,8,2
+</Sonata_Form:E_Sub1>,-1,呈示部：主部,Exposition: First Subject,8,2
+</Sonata_Form:E_Transition>,-1,呈示部：连接部,Exposition: Transition,8,2
+</Sonata_Form:E_MC>,-1,呈示部：中间停顿,Exposition: Medial Caesura,8,2
+</Sonata_Form:E_Sub2>,-1,呈示部：副部,Exposition: Second Subject,8,2
+</Sonata_Form:E_EEC>,-1,呈示部：EEC,Exposition: EEC,8,2
+</Sonata_Form:E_Closing>,-1,呈示部：结束部,Exposition: Closing Section,8,2
+</Sonata_Form:E_Codetta>,-1,呈示部：小尾声,Exposition: Codetta,8,2
+</Sonata_Form:D>,-1,奏鸣曲式：发展部,Sonata Form: Development,8,2
+</Sonata_Form:D_Retransition>,-1,发展部：再连接部,Development: Retransition,8,2
+<Sonata_Form:D_DL></Sonata_Form:D_DL>,18,发展部：属音锁定,Development: Dominant Lock,8,2
+</Sonata_Form:R_Sub1>,-1,再现部：主部,Recapitulation: First Subject,8,2
+</Sonata_Form:R_Transition>,-1,再现部：连接部,Recapitulation: Transition,8,2
+</Sonata_Form:R_Sub2>,-1,再现部：副部,Recapitulation: Second Subject,8,2
+</Sonata_Form:R_ESC>,-1,再现部：ESC,Recapitulation: ESC,8,2
+</Sonata_Form:R_Closing>,-1,再现部：结束部,Recapitulation: Closing Section,8,2
+</Sonata_Form:Coda>,-1,奏鸣曲式：尾声,Recapitulation: Coda,8,2
+</Pop_Form>,-1,主歌-副歌式,Verse-Chorus Form,8,3
+</Pop_Form:Intro>,-1,主歌-副歌式：引子,Verse-Chorus Form: Intro,8,3
+</Pop_Form:UpfrontChorus>,-1,主歌-副歌式：冒头副歌,Verse-Chorus Form: Upfront Chorus,8,3
+</Pop_Form:Verse>,-1,主歌-副歌式：主歌,Verse-Chorus Form: Verse,8,3
+</Pop_Form:Prechorus>,-1,主歌-副歌式：预副歌,Verse-Chorus Form: Pre-Chorus,8,3
+</Pop_Form:Chorus>,-1,主歌-副歌式：副歌,Verse-Chorus Form: Chorus,8,3
+</Pop_Form:PostChorus>,-1,主歌-副歌式：后副歌,Verse-Chorus Form: Post-Chorus,8,3
+</Pop_Form:InstBreak>,-1,主歌-副歌式：副歌间奏,Verse-Chorus Form: Instrumental Break,8,3
+</Pop_Form:Verse2>,-1,主歌-副歌式：主歌第二遍,Verse-Chorus Form: Verse 2,8,3
+</Pop_Form:Prechorus2>,-1,主歌-副歌式：预副歌第二遍,Verse-Chorus Form: Pre-Chorus 2,8,3
+</Pop_Form:Chorus2>,-1,主歌-副歌式：副歌第二遍,Verse-Chorus Form: Chorus 2,8,3
+</Pop_Form:ChorusExtension>,-1,主歌-副歌式：副歌第二遍延长,Verse-Chorus Form: Chorus Extension,8,3
+</Pop_Form:Bridge>,-1,主歌-副歌式：桥部,Verse-Chorus Form: Bridge,8,3
+</Pop_Form:Bridge_Solo>,-1,主歌-副歌式：桥部乐器独奏,Verse-Chorus Form: Bridge Instrumental Solo,8,3
+</Pop_Form:PreChorus3>,-1,主歌-副歌式：预副歌第三遍,Verse-Chorus Form: Pre-Chorus 3,8,3
+</Pop_Form:BreakdownChorus>,-1,主歌-副歌式：静奏副歌,Verse-Chorus Form: Breakdown Chorus,8,3
+</Pop_Form:Chorus3+>,-1,主歌-副歌式：副歌第三遍+,Verse-Chorus Form: Chorus 3+,8,3
+</Pop_Form:Outro>,-1,主歌-副歌式：尾声,Verse-Chorus Form: Outro,8,3
+</StropheBridge_Form>,-1,主段-桥部式,Strophe-Bridge Form,8,4
+</StropheBridge_Form:Intro>,-1,主段-桥部式：引子,Strophe-Bridge Form: Intro,8,4
+</StropheBridge_Form:Strophe>,-1,主段-桥部式：主段,Strophe-Bridge Form: Strophe,8,4
+</StropheBridge_Form:Bridge>,-1,主段-桥部式：桥部,Strophe-Bridge Form: Bridge,8,4
+</StropheBridge_Form:InstBridge>,-1,主段-桥部式：器乐桥部,Strophe-Bridge Form: Instrumental Bridge,8,4
+</StropheBridge_Form:Refrain>,-1,主段-桥部式：叠句,Strophe-Bridge Form: Refrain,8,4
+</StropheBridge_Form:Outro>,-1,主段-桥部式：尾声,Strophe-Bridge Form: Outro,8,4
+</Strophic_Form>,-1,分节歌式,Strophic Form,8,5
+</Strophic_Form:Intro>,-1,分节歌式：引子,Strophic Form: Intro,8,5
+</Strophic_Form:Strophe>,-1,分节歌式：主段,Strophic Form: Strophe,8,5
+</Strophic_Form:Refrain>,-1,分节歌式：叠句,Strophic Form: Refrain,8,5
+</Strophic_Form:InstStrophe>,-1,分节歌式：器乐主段,Strophic Form: Instrumental Strophe,8,5
+</Strophic_Form:InstBreak>,-1,分节歌式：器乐间奏,Strophic Form: Instrumental Break,8,5
+</Strophic_Form:Outro>,-1,分节歌式：尾声,Strophic Form: Outro,8,5
+</EDM_Form>,-1,EDM曲式,EDM Form,8,6
+</EDM_Form:Intro>,-1,EDM曲式：引子,EDM Form: Intro,8,6
+</EDM_Form:Groove>,-1,EDM曲式：节拍主段,EDM Form: Groove,8,6
+</EDM_Form:Breakdown>,-1,EDM曲式：Breakdown段,EDM Form: Breakdown,8,6
+</EDM_Form:BuildUp>,-1,EDM曲式：蓄势段,EDM Form: Build-Up,8,6
+</EDM_Form:Drop>,-1,EDM曲式：Drop段,EDM Form: Drop,8,6
+</EDM_Form:Outro>,-1,EDM曲式：尾声,EDM Form: Outro,8,6
+</FORM_END>,-1,结束全部曲式,End All Forms,8,7
+</FORM_END:>,-2,结束指定曲式,End Selected Form,8,7
+"{TC:""""}",-3,模糊调性参照,Ambiguous Tonal Reference,1,
+"{M:""""|}{/M}",4,转向模糊参照,Modulation to Ambiguous Reference,2,
+"{MH:""""|}",5,强行转向模糊参照,Forced Modulation to Ambiguous Reference,2,
+"<Centricity:""""></Centricity>",13,模糊中心性,Ambiguous Centricity,3,
+<DTC:>,-2,双主音复合体,Double-Tonic Complex,3,
