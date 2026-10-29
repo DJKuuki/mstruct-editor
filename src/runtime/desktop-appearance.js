@@ -2,6 +2,7 @@ import { APPLICATION_COLOR_SCHEME_STORAGE_KEY, normalizeApplicationColorScheme }
 import { createApplicationSettings } from "../ui/application-settings.js";
 import { normalizeRendererPreferences, RENDERER_PREFERENCES_STORAGE_KEY } from "../core/renderer-preferences.js";
 import { createDesktopMenu } from "../ui/desktop-menu.js";
+import { setupDesktopScoreScale } from "./desktop-score-scale.js";
 import "../ui/application-colors.css";
 import "../ui/application-settings.css";
 import "./desktop-appearance.css";
@@ -23,6 +24,7 @@ export function setupDesktopAppearance({ desktopApi, button, tr, rules, openRule
     shell.dataset.appColorScheme = colorScheme;
   } });
   shell.dataset.desktopShell = "true";
+  setupDesktopScoreScale({ target: document.querySelector("#rendererCanvas") });
   createDesktopMenu({ api: desktopApi, label: () => tr("desktopMenuBar") });
   document.querySelector(".header-actions").append(document.querySelector("#renderButton"));
   desktopApi.onCommand(command => { if (command === "application-settings") ui.open(); if (command === "editor-settings") openEditorSettings(); });

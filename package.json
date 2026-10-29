@@ -1,6 +1,6 @@
 {
   "name": "mstruct-editor",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Standalone MStruct analysis editor",
   "license": "MIT",
   "engines": {
