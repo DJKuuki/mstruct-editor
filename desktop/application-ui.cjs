@@ -84,7 +84,7 @@ function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotice
   };
   return [
     { id: "file", label: tr("file"), submenu: [command("new", "new", "CmdOrCtrl+N", hasDocument), separator(), command("open", "open", "CmdOrCtrl+O"), recent, command("save", "save", "CmdOrCtrl+S", hasDocument), command("saveAs", "save-as", "CmdOrCtrl+Shift+S", hasDocument), separator(),
-      { id: "export", label: tr("export"), enabled: hasDocument, submenu: ["pdf", "svg", "png", "jpg"].map(format => ({ id: `export:${format}`, enabled: hasDocument, label: `${format.toUpperCase()}…`, click: () => sendDocumentCommand(`export:${format}`) })) }, separator(),
+      { id: "export", label: tr("export"), enabled: hasDocument, submenu: ["pdf", "svg", "png", "jpg", "mp4"].map(format => ({ id: `export:${format}`, enabled: hasDocument, label: `${format.toUpperCase()}…`, click: () => sendDocumentCommand(`export:${format}`) })) }, separator(),
       ...(hasDocument ? [{ id: "open-current-directory", label: tr("openCurrentDirectory"), enabled: hasDocumentPath, click: openCurrentDirectory }, separator(), command("returnLibrary", "return-library"), separator()] : []), role("quit")] },
     { id: "edit", label: tr("edit"), submenu: [role("undo", "undo", hasDocument), role("redo", "redo", hasDocument), separator(), role("cut", "cut", hasDocument), role("copy", "copy", hasDocument), role("paste", "paste", hasDocument), role("selectAll", "selectAll", hasDocument)] },
     { id: "view", label: tr("view"), submenu: [role("fullscreen", "togglefullscreen"), separator(), role("resetZoom"), role("zoomIn"), role("zoomOut")] },

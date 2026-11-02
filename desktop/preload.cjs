@@ -45,6 +45,13 @@ contextBridge.exposeInMainWorld("mstructDesktop", Object.freeze({
   prepareScoreExport: (payload) => ipcRenderer.invoke("mstruct:export-prepare", payload),
   completeScoreExport: (payload) => ipcRenderer.invoke("mstruct:export-complete", payload),
   cancelScoreExport: (token) => ipcRenderer.send("mstruct:export-cancel", token),
+  startVideoExport: (value) => ipcRenderer.invoke("mstruct-video:start", value),
+  cancelVideoExport: () => ipcRenderer.invoke("mstruct-video:cancel"),
+  onVideoProgress: (callback) => {
+    const listener = (_event, value) => callback(value);
+    ipcRenderer.on("mstruct-video:progress", listener);
+    return () => ipcRenderer.removeListener("mstruct-video:progress", listener);
+  },
   loadTimelines: (fileNames) => ipcRenderer.invoke("mstructtime:list", fileNames),
   openTimeline: () => ipcRenderer.invoke("mstructtime:open"),
   createTimeline: (payload) => ipcRenderer.invoke("mstructtime:create", payload),

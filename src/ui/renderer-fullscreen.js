@@ -191,6 +191,8 @@ export function createRendererFullscreen({
   const comment = infoPanel.querySelector("#rendererFullscreenComment");
   let externalFullscreen = false;
   let desktopPreview = false;
+  let staffReady = Promise.resolve();
+  let readyEntry = null;
   let latestState = null;
   let latestEntry = null;
   let renderedEntry = null;
@@ -357,7 +359,7 @@ export function createRendererFullscreen({
       tags.textContent = EMPTY_VALUE;
     }
     renderCommentText(comment, information.comment?.text || EMPTY_VALUE);
-    void drawStaff(information);
+    staffReady = drawStaff(information);
     fitInformation();
   }
 
@@ -457,6 +459,12 @@ export function createRendererFullscreen({
 
   return {
     update,
+    async whenReady() {
+      await staffReady;
+      if (readyEntry === renderedEntry) return;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      readyEntry = renderedEntry;
+    },
     refresh,
     setExternalFullscreen,
     destroy() {

@@ -21,6 +21,18 @@ SHA-256: 54680c0289541f06932b77d1fbdd52e362c3518bbda8b1e2233e051d667d2767
 
 Runtime libraries
 -----------------
+- FFmpeg n8.1.3-29-gad3b795b72-20261101 — LGPL-3.0-or-later, BtbN LGPL
+  shared build. Copyright the FFmpeg developers and bundled library authors.
+  Runs as a separate, replaceable process; MStruct does not link its libraries.
+  H.264 uses Windows Media Foundation; AAC uses FFmpeg's native encoder.
+  No libx264, libx265 or nonfree build is distributed.
+  Binary source: https://github.com/BtbN/FFmpeg-Builds/releases/tag/autobuild-2026-11-01-12-49
+  FFmpeg source: https://github.com/FFmpeg/FFmpeg/tree/ad3b795b72
+  Build recipe and dependency sources: https://github.com/BtbN/FFmpeg-Builds
+  Exact download, hashes and source URLs: video-encoder/SOURCE.json.
+  Full license texts: video-encoder/LICENSE-LGPLv3.txt and LICENSE-GPLv3.txt.
+  The binaries are redistributed unmodified. Users may replace this encoder
+  and its adjacent libraries with a compatible build.
 - Electron 44.4.5 — MIT; local license: licenses/ELECTRON-MIT.txt.
 - VexFlow 5.0.0 — MIT; local license: licenses/VEXFLOW-MIT.txt.
 - smplr 1.0.0 — MIT as declared by its npm package and upstream README;

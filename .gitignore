@@ -2,6 +2,7 @@ node_modules/
 dist/
 release/
 desktop/generated/
+desktop/assets/video-encoder/
 user-data/
 .test-tmp/
 .backups/

@@ -1,6 +1,6 @@
 {
   "name": "mstruct-editor",
-  "version": "1.0.17",
+  "version": "1.0.19",
   "description": "Standalone MStruct analysis editor",
   "license": "MIT",
   "engines": {
@@ -15,11 +15,11 @@
     "desktop:icon": "node desktop/generate-icon.cjs",
     "desktop:version": "node desktop/version.mjs",
     "desktop:verify": "node desktop/verify-assets.mjs",
-    "desktop:prepare": "node scripts/prepare-desktop-profile.mjs && npm run desktop:icon && npm run desktop:verify",
+    "desktop:prepare": "node scripts/prepare-desktop-profile.mjs && node scripts/prepare-video-encoder.mjs && npm run desktop:icon && npm run desktop:verify",
     "desktop:run": "npm run desktop:prepare && npm run build && electron .",
     "desktop:dist": "npm run desktop:prepare && npm run build && electron-builder --win --dir --x64",
     "preview": "vite preview",
-    "test": "node --test tests/dtc.test.mjs tests/forms.test.mjs tests/mstruct.test.mjs tests/validation.test.mjs tests/mstructtime.test.mjs tests/playback.test.mjs tests/engraving.test.mjs tests/duration-notation.test.mjs tests/metadata.test.mjs tests/profile.test.mjs tests/standalone-profiles.test.mjs tests/profile-search.test.mjs tests/rendering.test.mjs tests/note-display.test.mjs tests/chords.test.mjs tests/romans.test.mjs tests/inline-music.test.mjs tests/i18n.test.mjs tests/toolbox.test.mjs tests/tags.test.mjs tests/shortcuts.test.mjs tests/search.test.mjs tests/search-notation.test.mjs tests/score-export.test.mjs tests/desktop.test.mjs tests/desktop-audio.test.mjs tests/portable-data.test.mjs tests/recent-documents.test.mjs tests/library.test.mjs tests/library-diff.test.mjs tests/application-menu.test.mjs tests/document-transition.test.mjs"
+    "test": "node --test tests/dtc.test.mjs tests/forms.test.mjs tests/mstruct.test.mjs tests/validation.test.mjs tests/mstructtime.test.mjs tests/playback.test.mjs tests/engraving.test.mjs tests/duration-notation.test.mjs tests/metadata.test.mjs tests/profile.test.mjs tests/standalone-profiles.test.mjs tests/profile-search.test.mjs tests/rendering.test.mjs tests/note-display.test.mjs tests/chords.test.mjs tests/romans.test.mjs tests/inline-music.test.mjs tests/i18n.test.mjs tests/toolbox.test.mjs tests/tags.test.mjs tests/shortcuts.test.mjs tests/search.test.mjs tests/search-notation.test.mjs tests/score-export.test.mjs tests/desktop.test.mjs tests/desktop-audio.test.mjs tests/portable-data.test.mjs tests/recent-documents.test.mjs tests/library.test.mjs tests/library-diff.test.mjs tests/application-menu.test.mjs tests/document-transition.test.mjs tests/video-export.test.mjs"
   },
   "devDependencies": {
     "@fontsource/crimson-pro": "5.3.0",
@@ -46,6 +46,9 @@
       "desktop/application-ui.cjs",
       "desktop/application-menu.cjs",
       "desktop/document-transition.cjs",
+      "desktop/video-export.cjs",
+      "desktop/video-encoding.cjs",
+      "desktop/video-stage-preload.cjs",
       "desktop/preload.cjs",
       "desktop/profile-store.cjs",
       "desktop/user-data.cjs",

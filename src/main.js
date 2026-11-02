@@ -26,10 +26,11 @@ import { renderInlineMusicText } from "./ui/inline-music.js";
 import { makeDurationNotes } from "./ui/duration-label.js";
 import { createTempoLabels } from "./ui/tempo-label.js";
 import { createScoreRenderer } from "./ui/score-renderer.js";
+import { createScoreDocumentHeader } from "./ui/score-document-header.js";
 import { createScoreFeedback } from "./ui/score-feedback.js";
 import { setupScoreExport } from "./ui/score-export.js";
 import { setupRendererNav } from "./ui/renderer-nav.js";
-import { readRendererLayers, tagIsVisible, writeRendererLayers } from "./core/renderer-layers.js";
+import { readRendererLayers, normalizeRendererLayers, writeRendererLayers } from "./core/renderer-layers.js";
 import { setupRendererDisplay } from "./ui/renderer-display.js";
 import { createSourceEditor } from "./ui/source-editor.js";
 import { createEditorWarningSettings } from "./ui/editor-warning-settings.js";
@@ -43,6 +44,7 @@ import { readStandaloneLocale, setupLanguageSwitcher } from "./ui/language-switc
 import { createDevBrowserDocumentAdapter } from "./runtime/dev-browser.js";
 import { createDesktopDocumentAdapter } from "./runtime/desktop.js";
 import { createDesktopExportAdapter } from "./runtime/desktop-export.js";
+import { setupEditorVideoExport } from "./runtime/editor-video-export.js";
 import { setupDesktopAppearance } from "./runtime/desktop-appearance.js";
 import { setupDesktopWorkspace } from "./runtime/desktop-workspace.js";
 import { setupDocumentSession } from "./runtime/document-session.js";
@@ -547,26 +549,9 @@ function scheduleScoreOverlayLayout() {
 
 const scoreFeedback = createScoreFeedback({ canvas: rendererCanvas, status: renderStatus, makeElement, tr, formatDiagnostic: syntaxErrorMessage });
 
-function renderDocumentHeader(documentMetadata = metadata) {
-  const normalized = normalizeMetadata(documentMetadata);
-  const composers = normalized.composers.map((composer) => composer.name).filter(Boolean);
-  if (!normalized.songName && !composers.length) return null;
-  const header = makeElement("header", "score-document-header");
-  if (normalized.songName) header.append(makeElement("h2", "score-document-title", normalized.songName));
-  if (composers.length) header.append(makeElement("p", "score-document-composers", composers.join(", ")));
-  return header;
-}
-
-function renderGlobalTags(tags) {
-  const visible = tags?.filter(tag => tagIsVisible(tag, rendererLayers)) ?? [];
-  if (!visible.length) return null;
-  const section = makeElement("section", "score-global-tags");
-  section.append(makeElement("h3", "score-global-tags-title", tr("globalTagsLabel")));
-  const list = makeElement("div", "score-global-tags-list");
-  visible.forEach((tag) => list.append(makeTagLabel(tag, "tag-label tag-oneshot")));
-  section.append(list);
-  return section;
-}
+const { renderDocumentHeader, renderGlobalTags } = createScoreDocumentHeader({
+  makeElement, tr, makeTagLabel, getMetadata: () => metadata, getLayers: () => rendererLayers,
+});
 
 function renderResult(result) {
   closeChordPopover();
@@ -1045,3 +1030,12 @@ desktopWorkspace = setupDesktopWorkspace({ api: desktopApi, profiles: standalone
   refreshLayout: () => requestAnimationFrame(() => refreshScoreLayout({ force: true })), onTimelines: files => timelineEditorUi?.setFiles(files),
   onMissingTimelines: missing => window.alert(tr("timelineMissingNotice", { names: missing.join(", ") })), errorMessage: syntaxErrorMessage });
 await desktopWorkspace?.start();
+
+setupEditorVideoExport({ api: desktopApi, tr, profileSession: documentProfile, parse: parseMainSource,
+  navigation: () => rendererNav, display: rendererDisplay, render: renderSource, refreshLayout: () => refreshScoreLayout({ force: true }),
+  getDocument: () => ({ main: sourceInput.value, metadata, comments }), getPreferences: () => chordPreferences, getLayers: () => rendererLayers,
+  applySnapshot(snapshot) {
+    metadata = normalizeMetadata(snapshot.metadata); comments = normalizeComments(snapshot.comments);
+    setInterfaceLocale(snapshot.locale); setChordPreferences(snapshot.preferences); applyInterfaceLocale();
+    rendererLayers = normalizeRendererLayers(snapshot.layers); sourceInput.value = snapshot.main;
+  } });

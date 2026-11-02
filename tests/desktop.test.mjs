@@ -143,12 +143,12 @@ test("desktop shell exposes only narrow document APIs and keeps the renderer san
   assert.doesNotMatch(preloadSource, /require\("node:fs/);
 });
 
-test("standalone export stays behind a narrow desktop adapter and writes vector-first PDF", () => {
+test("standalone export stays behind a narrow desktop adapter and writes vector-first PDF", async () => {
   const commands = [];
   const menus = applicationMenuTemplate({ tr: createDesktopLocale("en").tr, sendDocumentCommand: command => commands.push(command) });
   const exports = menus[0].submenu.find(item => item.label === "Export").submenu;
   exports.forEach(item => item.click());
-  assert.deepEqual(commands, ["export:pdf", "export:svg", "export:png", "export:jpg"]);
+  assert.deepEqual(commands, ["export:pdf", "export:svg", "export:png", "export:jpg", "export:mp4"]);
   assert.match(mainSource, /ipcMain\.handle\("mstruct:export-prepare", prepareScoreExport\)/);
   assert.match(mainSource, /ipcMain\.handle\("mstruct:export-complete", completeScoreExport\)/);
   assert.match(mainSource, /ipcMain\.on\("mstruct:export-cancel", cancelScoreExport\)/);
@@ -185,7 +185,10 @@ test("standalone export stays behind a narrow desktop adapter and writes vector-
   assert.match(preloadSource, /prepareScoreExport: \(payload\) => ipcRenderer\.invoke\("mstruct:export-prepare", payload\)/);
   assert.match(preloadSource, /completeScoreExport: \(payload\) => ipcRenderer\.invoke\("mstruct:export-complete", payload\)/);
   assert.match(preloadSource, /cancelScoreExport: \(token\) => ipcRenderer\.send\("mstruct:export-cancel", token\)/);
-  assert.match(desktopExportSource, /command\.startsWith\("export:"\)/);
+  const { createDesktopExportAdapter } = await import("../src/runtime/desktop-export.js");
+  const stillFormats = [];
+  createDesktopExportAdapter({ onCommand: callback => ["export:pdf", "export:mp4", "play"].forEach(callback) }).onCommand(format => stillFormats.push(format));
+  assert.deepEqual(stillFormats, ["pdf"]);
   assert.doesNotMatch(desktopExportSource, /electron|node:fs/);
 });
 

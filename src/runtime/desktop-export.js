@@ -3,7 +3,7 @@ export function createDesktopExportAdapter(desktopApi) {
   return {
     onCommand(callback) {
       desktopApi.onCommand((command) => {
-        if (typeof command === "string" && command.startsWith("export:")) callback(command.slice("export:".length));
+        if (["export:pdf", "export:svg", "export:png", "export:jpg"].includes(command)) callback(command.slice("export:".length));
       });
     },
     prepare(payload) {

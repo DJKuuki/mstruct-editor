@@ -49,6 +49,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
   let bgmReady = false;
   let bgmFileName = "";
   let bgmUrl = null;
+  let bgmSourceFile = null;
   let bgmLoadPromise = null;
   let cancelBgmLoad = null;
   let bgmLoadId = 0;
@@ -520,6 +521,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
     bgmAudio.load();
     if (bgmUrl) URL.revokeObjectURL(bgmUrl);
     bgmUrl = null;
+    bgmSourceFile = null;
     bgmReady = false;
     bgmFileName = "";
   }
@@ -555,6 +557,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
       await bgmLoadPromise;
       if (loadId !== bgmLoadId) return;
       bgmReady = true;
+      bgmSourceFile = file;
       seekBgm();
       if (isPlaybackRunning()) startBgm();
       setNotice("bgm-ready", 1000);
@@ -756,6 +759,20 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
     loadBgmFile,
     clearBgmFile() { bgmLoadId += 1; cancelBgmLoad?.(); resetBgmSource(); emit(); },
     getState: state,
+    async getExportSnapshot() {
+      if (bgmLoadPromise) await bgmLoadPromise.catch(() => {});
+      return { timelineDocument, temporaryOffset, userOffset, pianoEnabled, bgmVolume,
+        bgmDurationMs: bgmReady && Number.isFinite(bgmAudio.duration) ? bgmAudio.duration * 1000 : 0,
+        bgmFile: bgmReady ? bgmSourceFile : null };
+    },
+    /** External presentation clock; it never starts realtime audio or timers. */
+    renderAt(value) {
+      cancelFrame();
+      mode = "paused";
+      elapsedMs = Math.max(0, Number(value) || 0);
+      updateActive();
+      emit();
+    },
     beginScrub,
     previewScrub,
     commitScrub,

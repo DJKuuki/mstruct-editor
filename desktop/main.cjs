@@ -12,6 +12,7 @@ const { setupDesktopAudio } = require("./library-audio.cjs");
 const { createDesktopLocale, applicationMenuTemplate, openCurrentDocumentDirectory, TECHNICAL_DOCUMENTATION_URL } = require("./application-ui.cjs");
 const { createApplicationMenu } = require("./application-menu.cjs");
 const { createDocumentTransition } = require("./document-transition.cjs");
+const { setupVideoExport } = require("./video-export.cjs");
 const desktopLocale = createDesktopLocale();
 const nativeTr = desktopLocale.tr;
 
@@ -167,7 +168,9 @@ async function handleAppRequest(request) {
       ? body.toString("utf8")
       : Uint8Array.from(body);
     const headers = { "content-type": CONTENT_TYPES.get(extension) || "application/octet-stream" };
-    if (!isDesktopAsset && resourcePath.endsWith(`${path.sep}index.html`)) headers["content-security-policy"] = CONTENT_SECURITY_POLICY;
+    if (!isDesktopAsset && extension === ".html") headers["content-security-policy"] = CONTENT_SECURITY_POLICY;
+    if (url.host === "renderer" && url.pathname === "/index.html" && url.search === "?video-export")
+      headers["content-security-policy"] = CONTENT_SECURITY_POLICY.replace("frame-ancestors 'none'", "frame-ancestors 'self'");
     return new Response(responseBody, {
       status: 200,
       headers,
@@ -798,7 +801,7 @@ async function createMainWindow() {
       mainWindow.close();
     });
   });
-  mainWindow.on("closed", () => { mainWindow = null; pendingScoreExports.clear(); pendingRasterDocuments.clear(); });
+  mainWindow.on("closed", () => { videoExport.cancel(); mainWindow = null; pendingScoreExports.clear(); pendingRasterDocuments.clear(); });
   const load = mainWindow.loadURL(`${APP_SCHEME}://renderer/index.html`);
   if (SMOKE_TEST) {
     await Promise.race([
@@ -816,6 +819,7 @@ const libraryIpc = setupLibraryIpc({ ipcMain, dialog, shell, userData: app.getPa
   setPath: setCurrentDocumentPath, locale: () => desktopLocale.get(), relocateAudio: (original, next) => desktopAudio.relocate(original, next) });
 const desktopAudio = setupDesktopAudio({ ipcMain, dialog, userData: app.getPath("userData"), window: () => mainWindow,
   locale: () => desktopLocale.get(), assertTrustedSender, currentPath: () => currentDocumentPath, library: libraryIpc });
+const videoExport = setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow: () => mainWindow, assertTrustedSender, assetsRoot: desktopAssetsRoot, captureTiles: captureRasterTiles });
 setupUserDataIpc({ app, ipcMain, shell, dialog, getWindow: () => mainWindow, assertTrustedSender,
   confirmDiscard: () => confirmDiscard(nativeTr("clearUserDataAction")), beforeRestart: () => { closeConfirmed = true; }, tr: nativeTr });
 ipcMain.handle("mstruct:new", newDocument);

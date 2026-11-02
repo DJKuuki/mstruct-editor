@@ -1,5 +1,9 @@
 export const interfaceCopy = {
   zh: {
+    videoExportTitle: "导出 MP4 视频", videoExportDescription: "1920 × 1080 · 30 帧/秒。按当前全屏双栏版式从头播放，自动滚动，不含导航栏。使用当前音乐、音量与自动钢琴开关。",
+    videoExportAudioHelp: "混音时两路各预留 3 dB 余量，并限制峰值至 −2 dBFS，避免叠加爆音。音乐较长时，末画面保持到音乐结束。",
+    videoExportStart: "选择位置并导出", videoCancelExport: "取消导出", videoPreparing: "正在准备视频…", videoRenderingAudio: "正在生成钢琴音轨… {percent}%", videoRenderingFrames: "正在生成视频画面… {percent}%", videoEncoding: "正在完成 MP4 文件…",
+    videoExportCancelled: "已取消导出。", videoExportComplete: "视频已保存：{path}", videoExportFailed: "视频导出失败。", videoPlaybackUnavailable: "请先修复语法错误，并准备可播放的速度或时间轴。", videoTooLong: "视频超过六小时，请缩短播放路线。", videoPianoFailed: "无法加载离线钢琴音色。", videoExportBusy: "已有视频正在导出。", videoEncoderFailed: "视频编码器无法完成导出。",
     openDemoOnStartup: "启动时打开 DEMO 文件",
     romanWarnings: "Roman 分析建议",
     applicationSettings: "软件设置", closeApplicationSettings: "关闭软件设置", applicationColorScheme: "切换软件配色",
@@ -56,6 +60,10 @@ export const interfaceCopy = {
     invalidLength: "请输入 M:SS、MM:SS、H:MM:SS 或 HH:MM:SS。", pairedLinks: "附加链接需要同时填写网站名称和链接。", measure: "第 {count} 小节", continued: "（续）", elidedMeasures: "省略的小节", scoreSystem: "乐谱行", syntaxErrorTitle: "语法错误", renderFailed: "脚本无法渲染", line: "第 {count} 行", errors: "发现 {count} 个语法错误", incomplete: "没有可显示的乐谱内容。", syntaxValid: "已通过语法与节拍校验", submitting: "正在提交分析…", saving: "正在保存草稿…", complete: "已完成。", actionFailed: "操作失败。", exported: "已导出 .mstruct 文件", fileReadFailed: "无法读取所选文件", fileInvalid: "文件格式无效", mainImported: "已导入主体脚本", imported: "已导入 {name}：曲目信息与主体脚本均已更新", chordDetails: "和弦详情", closeChordDetails: "关闭和弦详情", chordDetailsAria: "查看和弦 {chord} 的详情", chordIntervalQuality: "和弦音级成分", chordNoteNames: "和弦音名", chordStaff: "五线谱", chordStaffAria: "钢琴双谱表：{notes}", chordStaffFailed: "无法渲染五线谱。", playChord: "播放和弦", loadingPiano: "正在载入钢琴……", chordAudioFailed: "无法载入钢琴采样，请检查网络后重试。", romanDetails: "罗马数字详情", closeRomanDetails: "关闭罗马数字详情", romanDetailsAria: "查看罗马数字 {roman} 的音级结构", romanStructure: "罗马数字音级结构",
   },
   en: {
+    videoExportTitle: "Export MP4 Video", videoExportDescription: "1920 × 1080 · 30 fps. Play the current fullscreen layout from the beginning, with automatic scrolling and no navigation bar. Uses the current music, volume and piano switch.",
+    videoExportAudioHelp: "Mixing reserves 3 dB per source and limits peaks to −2 dBFS to prevent clipping. If the music is longer, the final view remains until it ends.",
+    videoExportStart: "Choose Location and Export", videoCancelExport: "Cancel Export", videoPreparing: "Preparing video…", videoRenderingAudio: "Rendering piano audio… {percent}%", videoRenderingFrames: "Rendering video frames… {percent}%", videoEncoding: "Finishing MP4 file…",
+    videoExportCancelled: "Export cancelled.", videoExportComplete: "Video saved: {path}", videoExportFailed: "Video export failed.", videoPlaybackUnavailable: "Fix syntax errors and prepare a playable tempo or timeline first.", videoTooLong: "The video exceeds six hours. Shorten the playback route.", videoPianoFailed: "Could not load the offline piano samples.", videoExportBusy: "A video export is already running.", videoEncoderFailed: "The video encoder could not finish the export.",
     openDemoOnStartup: "Open DEMO File on Startup",
     romanWarnings: "Roman Recommendations",
     applicationSettings: "Application Settings", closeApplicationSettings: "Close application settings", applicationColorScheme: "Application Color Scheme",

@@ -12,6 +12,7 @@ import { createScoreRenderer } from "../src/ui/score-renderer.js";
 import { createScoreFeedback } from "../src/ui/score-feedback.js";
 
 const hostedDocumentSource = await readFile(new URL("../src/runtime/hosted-document.js", import.meta.url), "utf8");
+const headerSource = await readFile(new URL("../src/ui/score-document-header.js", import.meta.url), "utf8");
 
 test("screen barline edges occupy uniform whole device pixels at fractional zoom", () => {
   for (const ratio of [1, 1.25, 1.5, 2]) {
@@ -309,8 +310,9 @@ test("音簇、速度轨与文档标题使用各自的非交互渲染结构", ()
   assert.ok(rendererSource.indexOf("makeMetricModulationLabel(modulation.value)") < rendererSource.indexOf("makeBpmLabel(slot.annotations.bpm)"));
   assert.match(stylesheet, /\.tempo-label\s*\{[^}]*font-family:\s*"MStruct Text Accidentals", "Academico"[^}]*font-weight:\s*700/s);
   assert.match(popoverStylesheet, /fonts\/Academico-Bold\.otf/);
-  assert.match(rendererSource, /function renderDocumentHeader/);
-  assert.match(rendererSource, /normalized\.composers\.map\(\(composer\) => composer\.name\)/);
+  assert.match(mainSource, /createScoreDocumentHeader/);
+  assert.match(headerSource, /renderDocumentHeader\(/);
+  assert.match(headerSource, /normalized\.composers\.map\(composer => composer\.name\)/);
   assert.match(stylesheet, /\.score-document-title\s*\{[^}]*text-align:\s*center/s);
   assert.match(stylesheet, /\.score-document-composers\s*\{[^}]*justify-self:\s*end/s);
 });

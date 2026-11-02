@@ -400,6 +400,11 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       playback.refreshTimelineDocument(value);
     },
     getPlaybackState: playback.getState,
+    getExportSnapshot: playback.getExportSnapshot,
+    async renderPresentationAt(value) {
+      playback.renderAt(value);
+      await fullscreen.whenReady();
+    },
     seekPlayback: playback.seek,
     selectTimelineRow: playback.selectTimelineRow,
     setCountIn: playback.setCountIn,
