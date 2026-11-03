@@ -19,6 +19,6 @@ export function setupDesktopWorkspace({ api, profiles, locale, session, renderer
     newDocument() { audio.clear(); library.opened(); },
     async opened(fileNames) { audio.clear(); await timelines(fileNames); library.opened(); await audio.refresh(); },
     saved: () => library.saved(),
-    refreshAudio: () => audio.refresh(), chooseAudio: () => audio.choose(),
+    refreshAudio: () => audio.refresh(), chooseAudio: media => audio.choose(media),
   };
 }

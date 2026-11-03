@@ -17,10 +17,17 @@ export function setupEditorVideoExport({ api, tr, profileSession, parse, navigat
     const loaded = await profileSession.load(snapshot.metadata, snapshot.profile);
     if (!loaded.ok) throw new Error("videoPlaybackUnavailable");
     applySnapshot(snapshot);
+    navigation().handleCommand("presentation-mode", snapshot.playback.presentationMode ?? "default");
     navigation().handleCommand("fullscreen-view", true); display.setScale(snapshot.rendererScale);
     const result = render();
     navigation().setTimelineDocument(snapshot.playback.timelineDocument);
     navigation().handleCommand("offset", snapshot.playback.temporaryOffset);
+    if (snapshot.mediaUrl) {
+      const response = await fetch(snapshot.mediaUrl);
+      if (!response.ok) throw new Error("videoPlaybackUnavailable");
+      const blob = await response.blob();
+      await navigation().handleCommand("bgm-file", new File([blob], "video.mp4", { type: "video/mp4" }));
+    }
     return result;
   } });
 }

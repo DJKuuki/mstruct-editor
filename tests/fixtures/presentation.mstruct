@@ -1,0 +1,34 @@
+METADATA:
+{MSTRUCT_FORMAT_VERSION}1
+{MSTRUCT_PROFILE_ID}org.mstruct.official/rulesets/1.0.0
+{MSTRUCT_PROFILE_HASH}sha256:907259128e979e2e6c1241924915e4a84e1bceaba3aeec364ea10c322aef3dfc
+{SONG_NAME}滚动与视频测试 / Presentation Renderer Test
+{VERSION_NAME}Presentation
+{IS_STABLE_TEMPO}True
+{OFFSET}0
+END_METADATA
+
+MAIN:
+{BN:1}{TS:4/4}{D:1/4}{BPM:1/4=120}{TC:C}
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+[COMMENT:1]<Seq:A2,A3(+4/-2)><SeqInv:D1(+4/-A4)>C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,</Seq></SeqInv>G7|V7,[/COMMENT]C|I;
+{||:}C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I{:||};
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,-,-,-;
+END_MAIN
+
+COMMENT:
+[COMMENT:1<zh_cn>]
+检查跨谱行持续线、固定字号、暂停与跳转。将同名 MP4、WAV、MP3 放在此文件旁可检查自动匹配优先级。
+[/COMMENT:1<zh_cn>]
+[COMMENT:1<en>]
+Check cross-system lines, fixed scale, pause and seeking. Put matching MP4, WAV and MP3 files beside this file to check automatic selection priority.
+[/COMMENT:1<en>]
+END_COMMENT

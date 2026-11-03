@@ -10,6 +10,84 @@ import { createEditorStartupSettings } from "../src/ui/editor-startup-settings.j
 import { snapScoreBarline } from "../src/ui/score-barlines.js";
 import { createScoreRenderer } from "../src/ui/score-renderer.js";
 import { createScoreFeedback } from "../src/ui/score-feedback.js";
+import { presentationStripGeometry, presentationScrollGeometry, presentationHeightRanges, joinPresentationBoundaries, presentationContentBounds } from "../src/ui/renderer-scroll-strip.js";
+
+test("video strip reserves ordinary rows and expands only for the active tall system", () => {
+  const settings = { viewportHeight: 1080, maximumLeading: 420, maximumTrailing: 160 };
+  const ordinary = presentationStripGeometry({ ...settings, current: { leading: 70, trailing: 120 } });
+  const tall = presentationStripGeometry({ ...settings, current: { leading: 420, trailing: 160 } });
+  assert.equal(ordinary.height, 456);
+  assert.equal(tall.height, 608);
+  assert.equal(presentationStripGeometry({ ...settings, current: { leading: 70, trailing: 120 } }).height, ordinary.height);
+  assert.equal(presentationStripGeometry({ viewportHeight: 1080, maximumLeading: 100, maximumTrailing: 120, current: { leading: 100, trailing: 120 } }).height, 248);
+});
+
+test("scroll height follows individual BPM, tags and overlays as they fully leave either viewport edge", () => {
+  const items = [
+    { left: 0, right: 3000, top: -30, bottom: 120 },
+    { left: 80, right: 120, top: -100, bottom: -50 },
+    { left: 200, right: 300, top: 180, bottom: 220 },
+    { left: 300, right: 450, top: 199, bottom: 201 },
+    { left: 1150, right: 1250, top: -70, bottom: -40 },
+  ];
+  const geometry = offset => presentationScrollGeometry({ items, offset, viewportWidth: 800, viewportHeight: 1080 });
+  assert.deepEqual(geometry(-119.9), { leading: 100, height: 342 });
+  assert.deepEqual(geometry(-120), { leading: 30, height: 272 });
+  assert.deepEqual(geometry(-299.9), { leading: 30, height: 272 });
+  assert.deepEqual(geometry(-300), { leading: 30, height: 253 });
+  assert.deepEqual(geometry(-350), { leading: 30, height: 253 });
+  assert.deepEqual(geometry(-350.1), { leading: 70, height: 293 });
+  assert.deepEqual(geometry(-450), { leading: 70, height: 212 });
+  assert.deepEqual(geometry(-1250), { leading: 30, height: 172 });
+  assert.deepEqual(geometry(-120), { leading: 30, height: 272 });
+});
+
+test("ordinary score rows share the precomputed height and nearby tall passages share one held range", () => {
+  const settings = { viewportHeight: 900, maximumLeading: 137, maximumTrailing: 176 };
+  for (const current of [{ leading: 137, trailing: 170 }, { leading: 70, trailing: 176 }, { leading: 100, trailing: 150 }]) {
+    assert.equal(presentationStripGeometry({ ...settings, current }).height, 336);
+  }
+  const ranges = presentationHeightRanges([
+    { startMs: 2000, endMs: 3000, leading: 420, trailing: 160, height: 632 },
+    { startMs: 5000, endMs: 6000, leading: 250, trailing: 300, height: 600 },
+    { startMs: 10000, endMs: 11000, leading: 420, trailing: 160, height: 632 },
+  ], { leading: 203, height: 456 }, 1080);
+  assert.deepEqual(ranges.map(range => [range.start, range.end, range.height]), [[2000, 9000, 744], [10000, 14000, 608]]);
+});
+
+test("presentation bounds discard outer empty tracks and retain duration and dense tag boxes", () => {
+  const boxes = [
+    { top: 25, bottom: 60, width: 80, height: 35 },
+    { top: 100, bottom: 195, width: 100, height: 95 },
+    { top: 200, bottom: 245, width: 30, height: 45 },
+    { top: 250, bottom: 670, width: 180, height: 420 },
+    { top: -80, bottom: 800, width: 10, height: 880, hidden: true },
+  ];
+  const system = { ownerDocument: { defaultView: { getComputedStyle: element => ({ visibility: element.rect.hidden ? 'hidden' : 'visible' }) } },
+    querySelectorAll: () => boxes.map(rect => ({ rect, getBoundingClientRect: () => rect })),
+    getBoundingClientRect: () => ({ top: 0, bottom: 740 }) };
+  assert.deepEqual(presentationContentBounds(system), { top: 23, bottom: 672 });
+});
+
+test("strip joins draw a boundary once while retaining repeat sides and mid-measure continuations", () => {
+  const element = (classes, x = 0) => ({
+    classes: new Set(classes), style: { setProperty(key, value) { this[key] = value; } }, getBoundingClientRect: () => ({ left: x }),
+    get classList() { return { contains: key => this.classes.has(key), add: key => this.classes.add(key) }; },
+  });
+  for (const [endDouble, startDouble] of [[false, false], [true, false], [false, true], [true, true]]) {
+    const end = element(endDouble ? ['is-double-bar'] : [], 100), start = element(startDouble ? ['is-double-bar'] : [], 102.5);
+    const last = element(['measure']), first = element(['measure']);
+    last.querySelector = () => end; first.querySelector = () => start;
+    joinPresentationBoundaries([{ lastElementChild: last }, { firstElementChild: first }]);
+    assert.equal(end.style['--strip-boundary-shift'], '2.5px');
+    assert.equal(start.classes.has('is-strip-duplicate-line'), endDouble && !startDouble);
+    assert.equal(end.classes.has('is-strip-duplicate-line'), !(endDouble && !startDouble));
+  }
+  const start = element([]), first = element(['measure', 'is-measure-continuation']);
+  first.querySelector = () => start;
+  joinPresentationBoundaries([{ lastElementChild: element(['measure']) }, { firstElementChild: first }]);
+  assert.equal(start.classes.has('is-strip-continuation-start'), true);
+});
 
 const hostedDocumentSource = await readFile(new URL("../src/runtime/hosted-document.js", import.meta.url), "utf8");
 const headerSource = await readFile(new URL("../src/ui/score-document-header.js", import.meta.url), "utf8");

@@ -1,6 +1,12 @@
 import { createVideoExportPlan, pianoExportEvents } from "../core/video-export.js";
 import { createPianoExport } from "../core/piano-export.js";
 
+export function isVideoExportStage() {
+  if (window.location.search !== "?video-export") return false;
+  try { return Boolean(window.mstructVideo ?? window.parent.mstructVideo); }
+  catch { return false; }
+}
+
 /** Deterministic presentation clock; no filesystem or live audio playback. */
 export function setupVideoExportStage({ api, prepare, navigation, refreshLayout }) {
   if (!api && window.location.search === "?video-export") {
@@ -18,7 +24,7 @@ export function setupVideoExportStage({ api, prepare, navigation, refreshLayout 
       refreshLayout();
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       navigation().handleCommand("auto-scroll", true);
-      model = createVideoExportPlan(result, value.metadata, value.playback);
+      model = createVideoExportPlan(result, value.metadata, value.playback, value.fps);
       await navigation().renderPresentationAt(0);
       return { ...model, plan: undefined, hasPiano: Boolean(value.playback.pianoEnabled && pianoExportEvents(model.plan).length) };
     },

@@ -6,7 +6,9 @@ import { DEFAULT_RENDERER_SCALE, SCORE_BASE_FONT_SIZE, normalizeRendererScale,
 /** Display state and settings routing; score/export document state stays outside. */
 export function setupRendererDisplay({ canvas, hostedMode, getPreferences, updatePreferences, refreshLayout, postToHost, tr }) {
   let scale = hostedMode ? DEFAULT_RENDERER_SCALE : getRendererScaleSnapshot();
-  const applySize = () => canvas.style.setProperty("--score-font-size", `${SCORE_BASE_FONT_SIZE * scale / 100}px`);
+  let presentation = false;
+  const effectiveScale = () => presentation ? 125 : scale;
+  const applySize = () => canvas.style.setProperty("--score-font-size", `${SCORE_BASE_FONT_SIZE * effectiveScale() / 100}px`);
   applySize();
 
   function setScale(value) {
@@ -27,7 +29,8 @@ export function setupRendererDisplay({ canvas, hostedMode, getPreferences, updat
   });
   resizeObserver.observe(canvas);
   setupRendererSettings({
-    getScale: () => scale,
+    getScale: effectiveScale,
+    canScale: () => !presentation,
     updateScale: (next) => {
       if (!hostedMode) writeRendererScale(next);
       else {
@@ -48,5 +51,12 @@ export function setupRendererDisplay({ canvas, hostedMode, getPreferences, updat
     storageKey: hostedMode ? null : RENDERER_PREFERENCES_STORAGE_KEY,
     tr,
   });
-  return { getScale: () => scale, setScale, destroy: () => { unsubscribe(); resizeObserver.disconnect(); } };
+  return { getScale: effectiveScale, setScale,
+    setPresentationMode(value) {
+      if (presentation === value) return;
+      presentation = value;
+      applySize();
+      refreshLayout();
+    },
+    destroy: () => { unsubscribe(); resizeObserver.disconnect(); } };
 }

@@ -1,0 +1,60 @@
+.renderer-presentation-control { position: relative; display: inline-flex; }
+.renderer-presentation-menu { position: absolute; z-index: 50; inset-block-start: 100%; inset-inline-end: 0; display: none; min-inline-size: 128px; padding: 5px; border: 1px solid #bdc9c1; border-radius: 6px; background: #fff; box-shadow: 0 5px 18px #1c302728; }
+.renderer-presentation-control:not(.is-dismissed):hover .renderer-presentation-menu { display: grid; }
+.renderer-presentation-menu button { border: 0; border-radius: 3px; background: transparent; padding: 5px 10px; color: #35483d; font: inherit; font-size: 14px; line-height: 18px; text-align: start; white-space: nowrap; cursor: pointer; }
+.renderer-presentation-menu button:is(:hover, :focus-visible), .renderer-presentation-menu button[aria-checked="true"] { background: #e7ede8; }
+.renderer-presentation-video-frame { display: none; min-inline-size: 0; min-block-size: 0; background: #000; overflow: hidden; }
+.renderer-presentation-video { inline-size: 100%; block-size: 100%; object-fit: contain; }
+body .renderer-panel[data-presentation-mode="scroll"], body .renderer-panel[data-presentation-mode="video"] { --presentation-strip-height: 32vh; grid-template-rows: minmax(0, 1fr) var(--presentation-strip-height); }
+body .renderer-panel[data-presentation-mode="scroll"] { grid-template-columns: minmax(0, 1fr); }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-info {
+  --presentation-info-height: calc(100dvh - var(--presentation-strip-height) - var(--renderer-nav-height));
+  --presentation-info-inset: min(clamp(18px, 2vw, 34px), max(10px, calc(var(--presentation-info-height) * .06)));
+  grid-column: 1;
+  grid-row: 1;
+  border-inline-start: 0;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  column-gap: 24px;
+  padding-block: calc(var(--renderer-nav-height) + var(--presentation-info-inset)) var(--presentation-info-inset);
+  row-gap: min(clamp(14px, 1.6vh, 24px), max(8px, calc(var(--presentation-info-height) * .025)));
+}
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-field h2 {
+  font-size: min(clamp(10px, .72vw, 13px), max(10px, calc(var(--presentation-info-height) * .03)));
+}
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-field > :is(div, output) {
+  font-size: min(clamp(19px, 1.65vw, 31px), max(14px, calc(var(--presentation-info-height) * .065)));
+}
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-overview .renderer-fullscreen-field > output {
+  font-size: min(clamp(18px, 1.45vw, 28px), max(14px, calc(var(--presentation-info-height) * .065)));
+}
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-field > .renderer-fullscreen-tags {
+  font-size: min(clamp(19px, 1.65vw, 31px), max(16px, calc(var(--presentation-info-height) * .05)));
+}
+.renderer-panel[data-presentation-mode="scroll"] :is(.renderer-fullscreen-overview, .renderer-fullscreen-harmony, .renderer-fullscreen-analysis) { display: contents; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-overview > section { grid-column: span 3; grid-row: 1; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-harmony > section:nth-child(1) { grid-column: 1 / 4; grid-row: 2; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-harmony > section:nth-child(2) { grid-column: 4 / 7; grid-row: 2; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-analysis > section:nth-child(1) { grid-column: 7 / 10; grid-row: 2; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-analysis > section:nth-child(2) { grid-column: 10 / 13; grid-row: 2; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-tags-field { grid-column: 1 / -1; grid-row: 3; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-staff-field { grid-column: 1 / 5; grid-row: 4; display: grid; grid-template-rows: auto minmax(0, 1fr); min-block-size: 0; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-staff { min-block-size: 0; max-block-size: none; block-size: 100%; }
+.renderer-panel[data-presentation-mode="scroll"] .renderer-fullscreen-comment-field { grid-column: 5 / -1; grid-row: 4; }
+.renderer-panel[data-presentation-mode="video"] .renderer-fullscreen-info { grid-column: 2; grid-row: 1 / 3; }
+.renderer-panel[data-presentation-mode="video"] .renderer-presentation-video-frame { display: flex; grid-column: 1; grid-row: 1; padding-block-start: var(--renderer-nav-height); align-items: center; justify-content: center; }
+body.mstruct-viewer .renderer-panel[data-presentation-mode="scroll"] .renderer-canvas,
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .renderer-canvas { position: relative; grid-column: 1; grid-row: 2; padding: 10px 24px; overflow: hidden; scrollbar-gutter: auto; border-block-start: 2px solid #313131; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .measure-slot { border-block-end: 0; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .score-document-header,
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .score-global-tags { display: none; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .chart { display: flex; align-items: flex-start; gap: 0; inline-size: max-content; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .score-system { flex: 0 0 var(--presentation-system-width); inline-size: var(--presentation-system-width); }
+.is-strip-joined-line { translate: var(--strip-boundary-shift) 0; }
+.is-strip-duplicate-line { background: transparent !important; }
+.is-strip-duplicate-line::before, .is-strip-duplicate-line::after { display: none !important; }
+.is-strip-continuation-start { visibility: hidden; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .is-playback-active { background: transparent; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .is-playback-active::before { background: transparent; box-shadow: none; }
+.renderer-strip-focus { display: none; position: absolute; z-index: 5; border-radius: 4px; background: #f2cf6345; box-shadow: inset 0 0 0 1px #c5a346; pointer-events: none; }
+.renderer-panel:is([data-presentation-mode="scroll"], [data-presentation-mode="video"]) .renderer-strip-focus:not([hidden]) { display: block; }

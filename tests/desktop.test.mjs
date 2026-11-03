@@ -11,6 +11,7 @@ import { resolveMstructDocument } from "../src/core/profile-document.js";
 import { nextDesktopVersion, desktopBuildVersion } from "../desktop/version.mjs";
 import applicationUi from "../desktop/application-ui.cjs";
 const { createDesktopLocale, applicationMenuTemplate } = applicationUi;
+const rasterCaptureSource = await readFile(new URL("../desktop/raster-capture.cjs", import.meta.url), "utf8");
 
 const [packageJson, mainSource, preloadSource, audioSource, symbolSource, editorSource, desktopAdapterSource, desktopExportSource, batchSource, soundfont, license, notices] = await Promise.all([
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
@@ -166,15 +167,17 @@ test("standalone export stays behind a narrow desktop adapter and writes vector-
   assert.doesNotMatch(mainSource, /webContents\.debugger/);
   assert.doesNotMatch(mainSource, /Emulation\.setDeviceMetricsOverride/);
   assert.doesNotMatch(mainSource, /Page\.captureScreenshot/);
-  assert.match(mainSource, /async function captureRasterTiles/);
+  assert.match(mainSource, /require\("\.\/raster-capture\.cjs"\)/);
+  assert.match(rasterCaptureSource, /async function captureRasterTiles/);
+  assert.ok(packageJson.build.files.includes('desktop/raster-capture.cjs'));
   assert.match(mainSource, /transparent: transparentBackground/);
   assert.match(mainSource, /backgroundColor: transparentBackground \? "#00000000" : "#ffffff"/);
   assert.match(mainSource, /background-image:none!important/);
   assert.match(mainSource, /format === "png" && pngBackground === "transparent"/);
-  assert.match(mainSource, /webContents\.capturePage\([\s\S]*stayHidden: true, stayAwake: true/);
-  assert.match(mainSource, /tile\.toBitmap\(\{ scaleFactor: 1 \}\)/);
-  assert.match(mainSource, /nativeImage\.createFromBitmap\(bitmap, \{ width: size\.width, height: size\.height, scaleFactor: 1 \}\)/);
-  assert.match(mainSource, /captured an exported page tile at an unexpected size/);
+  assert.match(rasterCaptureSource, /webContents\.capturePage\([\s\S]*stayHidden: true, stayAwake: true/);
+  assert.match(rasterCaptureSource, /tile\.toBitmap\(\{ scaleFactor: 1 \}\)/);
+  assert.match(rasterCaptureSource, /nativeImage\.createFromBitmap\(bitmap, \{ width: size\.width, height: size\.height, scaleFactor: 1 \}\)/);
+  assert.match(rasterCaptureSource, /captured an exported page tile at an unexpected size/);
   assert.doesNotMatch(mainSource, /display\?\.scaleFactor/);
   assert.match(mainSource, /RASTER_EXPORT_SECURITY_POLICY/);
   assert.match(mainSource, /pendingRasterDocuments\.delete\(documentKey\)/);

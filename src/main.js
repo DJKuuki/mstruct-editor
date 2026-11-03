@@ -45,6 +45,7 @@ import { createDevBrowserDocumentAdapter } from "./runtime/dev-browser.js";
 import { createDesktopDocumentAdapter } from "./runtime/desktop.js";
 import { createDesktopExportAdapter } from "./runtime/desktop-export.js";
 import { setupEditorVideoExport } from "./runtime/editor-video-export.js";
+import { isVideoExportStage } from "./runtime/video-export-stage.js";
 import { setupDesktopAppearance } from "./runtime/desktop-appearance.js";
 import { setupDesktopWorkspace } from "./runtime/desktop-workspace.js";
 import { setupDocumentSession } from "./runtime/document-session.js";
@@ -544,6 +545,7 @@ function scheduleScoreOverlayLayout() {
     drawTagRangeLines(chart);
     drawCommentRangeLines(chart);
     drawEndingBrackets(chart, renderedScoreResult);
+    rendererNav?.refreshPresentationContent();
   });
 }
 
@@ -827,6 +829,10 @@ rendererNav = setupRendererNav({
   rendererCanvas,
   isHostedViewer,
   desktopPreviewMode: documentAdapter?.kind === "desktop",
+  presentationEnabled: true,
+  videoPresentationEnabled: documentAdapter?.kind === "desktop" || isVideoExportStage(),
+  onPresentationModeChange: value => rendererDisplay.setPresentationMode(value),
+  onChooseVideo: () => desktopWorkspace?.chooseAudio("video"),
   postToHost,
   closePopovers: () => {
     closeChordPopover();
@@ -849,6 +855,7 @@ rendererNav = setupRendererNav({
     target.append(chordPopover, romanPopover, commentPopover);
   },
   onFullscreenLayoutChange: refreshScoreLayout,
+  onPresentationGeometryChange: scheduleScoreOverlayLayout,
   getRendererLayers: () => rendererLayers,
   onRendererLayersChange: (value) => {
     rendererLayers = writeRendererLayers(value);

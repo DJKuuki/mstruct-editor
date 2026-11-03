@@ -1,4 +1,6 @@
-const { spawn } = require("node:child_process");
+const { spawn, execFile } = require("node:child_process");
+const { promisify } = require("node:util");
+const { randomUUID } = require("node:crypto");
 const { mkdtemp, open, writeFile, rename, rm } = require("node:fs/promises");
 const path = require("node:path");
 const { WIDTH, HEIGHT, FPS, SAMPLE_RATE, videoEncodingArguments } = require("./video-encoding.cjs");
@@ -6,7 +8,9 @@ const { WIDTH, HEIGHT, FPS, SAMPLE_RATE, videoEncodingArguments } = require("./v
 function validateSnapshot(value) {
   if (!value || typeof value.main !== "string" || value.main.length > 16 * 1024 * 1024 || !value.metadata || !value.profile || !value.playback) throw new Error("Invalid video export snapshot.");
   if (JSON.stringify({ ...value, bgm: undefined }).length > 48 * 1024 * 1024) throw new Error("Video export snapshot is too large.");
-  if (value.bgm && (!(value.bgm.bytes instanceof ArrayBuffer) || value.bgm.bytes.byteLength > 512 * 1024 * 1024 || !/\.(mp3|wav)$/i.test(value.bgm.name))) throw new Error("Invalid video audio.");
+  if (value.bgm && (!(value.bgm.bytes instanceof ArrayBuffer) || value.bgm.bytes.byteLength > 512 * 1024 * 1024 || !/\.(mp4|mp3|wav)$/i.test(value.bgm.name))) throw new Error("Invalid video audio.");
+  if (value.playback.presentationMode !== undefined && !["default", "scroll", "video"].includes(value.playback.presentationMode)) throw new Error("Invalid video presentation mode.");
+  if (value.fps !== undefined && value.fps !== 30 && value.fps !== 60) throw new Error("Invalid video frame rate.");
   if (!Number.isFinite(value.playback.bgmVolume) || value.playback.bgmVolume < 0 || value.playback.bgmVolume > 100) throw new Error("Invalid video audio volume.");
 }
 
@@ -56,11 +60,25 @@ function setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow, asse
       const target = /\.mp4$/i.test(result.filePath) ? result.filePath : `${result.filePath}.mp4`;
       job.directory = await mkdtemp(path.join(path.dirname(target), ".mstruct-video-"));
       const output = path.join(job.directory, "video.mp4");
+      const executable = path.join(assetsRoot(), "video-encoder", "bin", "ffmpeg.exe");
       let bgmPath, pianoPath;
       if (snapshot.bgm) {
-        bgmPath = path.join(job.directory, /\.wav$/i.test(snapshot.bgm.name) ? "music.wav" : "music.mp3");
+        bgmPath = path.join(job.directory, `music${path.extname(snapshot.bgm.name).toLowerCase()}`);
         await writeFile(bgmPath, Buffer.from(snapshot.bgm.bytes));
+        if (/\.mp4$/i.test(snapshot.bgm.name)) {
+          if (snapshot.playback.presentationMode === "video") {
+            job.mediaToken = randomUUID();
+            job.mediaBytes = snapshot.bgm.bytes;
+          }
+          try {
+            await promisify(execFile)(executable, ["-hide_banner", "-nostdin", "-i", bgmPath, "-map", "0:a:0?", "-vn", "-t", "0.001", "-f", "null", "-"], { windowsHide: true, timeout: 15000 });
+          } catch (error) {
+            if (/does not contain any stream/.test(error.stderr ?? "")) bgmPath = undefined;
+            else throw error;
+          }
+        }
       }
+      check(job);
       const ready = new Promise((resolve, reject) => { job.resolveReady = resolve; job.rejectReady = reject; });
       // Observe rejection immediately, including cancellation while loadURL waits.
       ready.catch(() => {});
@@ -76,21 +94,22 @@ function setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow, asse
       try { await job.window.loadURL("mstruct-app://renderer/video-capture.html"); await ready; }
       finally { clearTimeout(timer); }
       check(job);
-      const { bgm, ...presentation } = snapshot;
+      const { bgm, mediaUrl, ...presentation } = snapshot;
+      if (job.mediaToken) presentation.mediaUrl = `mstruct-app://renderer/__video_media__/${job.mediaToken}`;
       const model = await wait(job, contents.executeJavaScript(`window.mstructVideoStage.initialize(${JSON.stringify(presentation)})`));
+      const fps = snapshot.fps ?? FPS;
       const [viewportWidth, viewportHeight] = job.window.getContentSize();
-      if (model.width !== WIDTH || model.height !== HEIGHT || model.fps !== FPS || !Number.isSafeInteger(model.frameCount) || model.frameCount < 1 || model.frameCount > 6 * 3600 * FPS) throw new Error("Invalid video geometry or duration.");
+      if (model.width !== WIDTH || model.height !== HEIGHT || model.fps !== fps || !Number.isSafeInteger(model.frameCount) || model.frameCount < 1 || model.frameCount > 6 * 3600 * fps) throw new Error("Invalid video geometry or duration.");
       if (model.hasPiano) {
         pianoPath = path.join(job.directory, "piano.f32");
         job.audio = await open(pianoPath, "w");
-        job.expectedAudioBytes = Math.ceil(model.frameCount / FPS * SAMPLE_RATE) * 8;
+        job.expectedAudioBytes = Math.ceil(model.frameCount / fps * SAMPLE_RATE) * 8;
         try { await wait(job, contents.executeJavaScript("window.mstructVideoStage.audio()")); }
         finally { await job.audio.close(); job.audio = null; }
         if (job.audioBytes !== job.expectedAudioBytes) throw new Error("Video piano audio was incomplete.");
       }
       check(job);
-      const executable = path.join(assetsRoot(), "video-encoder", "bin", "ffmpeg.exe");
-      const args = videoEncodingArguments({ frameCount: model.frameCount, bgmPath, pianoPath, bgmVolume: snapshot.playback.bgmVolume, output });
+      const args = videoEncodingArguments({ frameCount: model.frameCount, fps, bgmPath, pianoPath, bgmVolume: snapshot.playback.bgmVolume, output });
       job.process = spawn(executable, args, { windowsHide: true, stdio: ["pipe", "ignore", "pipe"] });
       let diagnostics = "";
       job.process.stderr.on("data", chunk => { diagnostics = (diagnostics + chunk).slice(-6000); });
@@ -104,14 +123,14 @@ function setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow, asse
         check(job);
         await wait(job, contents.executeJavaScript(`window.mstructVideoStage.frame(${frame})`));
         check(job);
-        const image = await wait(job, captureTiles(contents, { width: WIDTH, height: HEIGHT }, { width: viewportWidth, height: viewportHeight }, false));
+        const image = await wait(job, captureTiles(contents, { width: WIDTH, height: HEIGHT }, { width: viewportWidth, height: viewportHeight }, false, { verifyPaint: true }));
         check(job);
         const size = image.getSize();
         if (size.width !== WIDTH || size.height !== HEIGHT) throw new Error(`Video frame was captured at ${size.width}x${size.height}; content ${job.window.getContentSize().join("x")}.`);
         const bitmap = image.toBitmap({ scaleFactor: 1 });
         if (bitmap.byteLength !== WIDTH * HEIGHT * 4) throw new Error("Video frame was incomplete.");
         await wait(job, new Promise((resolve, reject) => job.process.stdin.write(bitmap, error => error ? reject(error) : resolve())));
-        if (frame % FPS === 0) progress(job, "frames", 15 + 80 * frame / model.frameCount);
+        if (frame % fps === 0) progress(job, "frames", 15 + 80 * frame / model.frameCount);
       }
       job.process.stdin.end(); progress(job, "encoding", 96);
       await wait(job, finished); check(job);
@@ -130,7 +149,12 @@ function setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow, asse
   }
   ipcMain.handle("mstruct-video:start", start);
   app.on("before-quit", cancel);
-  return { cancel };
+  return { cancel,
+    response(token) {
+      if (!active?.mediaToken || token !== active.mediaToken || active.cancelled) return new Response("Not found", { status: 404 });
+      return new Response(active.mediaBytes, { headers: { "content-type": "video/mp4" } });
+    },
+  };
 }
 
 module.exports = { setupVideoExport, validateSnapshot };

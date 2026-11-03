@@ -23,7 +23,7 @@ export function setupDesktopAudioRuntime({ api, context, command }) {
       })();
       return pendingRefresh;
     },
-    async choose() { const serial = ++request; command("stop"); await load(await api.audioChoose(context()), serial); },
+    async choose(media = "audio") { const serial = ++request; command("stop"); await load(await api.audioChoose({ ...context(), media }), serial); },
     clear() { request++; contextKey = null; pendingRefresh = null; command("bgm-clear"); },
   };
 }

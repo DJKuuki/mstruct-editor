@@ -5,7 +5,7 @@ import {
   writeRendererShortcuts,
 } from "../core/renderer-shortcuts.js";
 
-export function setupRendererSettings({ getPreferences, updatePreferences, getScale, updateScale, openHostSettings, storageKey, tr }) {
+export function setupRendererSettings({ getPreferences, updatePreferences, getScale, updateScale, canScale = () => true, openHostSettings, storageKey, tr }) {
   const button = document.querySelector("#rendererSettingsButton");
   const dialog = document.querySelector("#rendererSettingsDialog");
   const close = document.querySelector("#rendererSettingsClose");
@@ -37,6 +37,7 @@ export function setupRendererSettings({ getPreferences, updatePreferences, getSc
     durationDisplayMode.checked = preferences.durationDisplayMode === "fraction";
     durationControl.dataset.mode = preferences.durationDisplayMode;
     scale.value = String(getScale());
+    scale.disabled = !canScale();
     scaleValue.value = `${getScale()}%`;
     globalPlaybackOffset.value = String(preferences.globalPlaybackOffset);
     shortcuts = normalizeRendererShortcuts(shortcuts);
@@ -80,6 +81,7 @@ export function setupRendererSettings({ getPreferences, updatePreferences, getSc
     changePreferences({ ...getPreferences(), durationDisplayMode: mode });
   });
   scale.addEventListener("input", () => {
+    if (!canScale()) return;
     updateScale(Number(scale.value));
     scaleValue.value = `${getScale()}%`;
   });

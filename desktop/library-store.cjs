@@ -66,7 +66,7 @@ function createLibraryStore(root) {
       : { path: nextRelative, data: text ?? old, expected: relative === nextRelative ? digest(old) : null });
     if (relative !== nextRelative && !caseOnly) changes.push({ path: relative, data: null, expected: digest(old) });
     const oldStem = relative.replace(/\.[^.]+$/, ""), nextStem = nextRelative.replace(/\.[^.]+$/, "");
-    if (relative !== nextRelative) for (const extension of [".mp3", ".wav"]) {
+    if (relative !== nextRelative) for (const extension of [".mp4", ".wav", ".mp3"]) {
       const audio = await readOptional(await safePath(root, `${oldStem}${extension}`));
       if (!audio) continue;
       await assertVacant(root, `${nextStem}${extension}`, caseOnly ? await safePath(root, `${oldStem}${extension}`) : null);
@@ -179,8 +179,8 @@ function createLibraryStore(root) {
           // Keep user audio byte-for-byte at its original path and remember that association.
           const oldStem = previous.localPath.replace(/\.[^.]+$/, "");
           const candidates = [];
-          for (const extension of [".mp3", ".wav"]) if (await readOptional(await safePath(root, `${oldStem}${extension}`))) candidates.push(path.join(root, ...`${oldStem}${extension}`.split("/")));
-          if (candidates.length === 1 && !state.audio[record.localPath]) state.audio[record.localPath] = candidates[0];
+          for (const extension of [".mp4", ".wav", ".mp3"]) if (await readOptional(await safePath(root, `${oldStem}${extension}`))) candidates.push(path.join(root, ...`${oldStem}${extension}`.split("/")));
+          if (candidates.length && !state.audio[record.localPath]) state.audio[record.localPath] = candidates[0];
         }
         localPath = record.localPath;
       }

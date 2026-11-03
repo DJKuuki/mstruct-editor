@@ -175,6 +175,7 @@ export function createRendererFullscreen({
   openChordPopover,
   setFullscreenPopovers,
   onLayoutChange,
+  onActiveChange,
   desktopPreviewMode = false,
   postToHost,
 }) {
@@ -218,6 +219,7 @@ export function createRendererFullscreen({
 
   function reflectButton() {
     const isActive = active();
+    onActiveChange?.(isActive);
     const label = tr(isActive ? "rendererExitFullscreen" : "rendererFullscreen");
     button.setAttribute("aria-pressed", String(isActive));
     button.setAttribute("aria-label", label);
@@ -459,6 +461,7 @@ export function createRendererFullscreen({
 
   return {
     update,
+    enter() { if (!active()) return toggle(); },
     async whenReady() {
       await staffReady;
       if (readyEntry === renderedEntry) return;
@@ -467,6 +470,7 @@ export function createRendererFullscreen({
     },
     refresh,
     setExternalFullscreen,
+    setDesktopPreview,
     destroy() {
       resizeObserver.disconnect();
       if (fitFrame !== null) window.cancelAnimationFrame(fitFrame);

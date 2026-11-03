@@ -1,0 +1,27 @@
+METADATA:
+{MSTRUCT_FORMAT_VERSION}1
+{MSTRUCT_PROFILE_ID}org.mstruct.official/rulesets/1.0.0
+{MSTRUCT_PROFILE_HASH}sha256:907259128e979e2e6c1241924915e4a84e1bceaba3aeec364ea10c322aef3dfc
+{SONG_NAME}标签密集排版测试 / Dense Tag Layout
+{VERSION_NAME}Renderer Test
+{IS_STABLE_TEMPO}True
+{OFFSET}0
+END_METADATA
+
+MAIN:
+{BN:1}{TS:4/4}{D:1/4}{BPM:1/4=240}{TC:C}
+[COMMENT:1]
+<Coltrane_Changes><Constant_Structure><Omnibus_Progression><Atonality><Polytonality><Pantriadic><Modality><Tonality><4536251><4536251V><Seq:A2,A3(+4/-2)><SeqInv:D1(+4/-A4)>
+C|I,Dm7|ii7,G7|V7,C|I;
+F|IV,Dm7|ii7,G7|V7,
+</Coltrane_Changes></Constant_Structure></Omnibus_Progression></Atonality></Polytonality></Pantriadic></Modality></Tonality></4536251></4536251V></Seq></SeqInv>[/COMMENT]C|I;
+END_MAIN
+
+COMMENT:
+[COMMENT:1<zh_cn>]
+同一事件开启 12 组持续标签，用于检查多行标签、持续线和谱带边缘的完整显示。
+[/COMMENT:1<zh_cn>]
+[COMMENT:1<en>]
+Twelve sustained tags start on the same event to check stacked labels, continuation lines and complete visibility at the strip edges.
+[/COMMENT:1<en>]
+END_COMMENT

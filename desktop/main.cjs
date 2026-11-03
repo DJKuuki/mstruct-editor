@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, ipcMain, nativeImage, protocol, screen, shell } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain, protocol, screen, shell } = require("electron");
 const { randomUUID } = require("node:crypto");
 const { appendFileSync } = require("node:fs");
 const { readFile, rename, stat, unlink, writeFile } = require("node:fs/promises");
@@ -13,6 +13,7 @@ const { createDesktopLocale, applicationMenuTemplate, openCurrentDocumentDirecto
 const { createApplicationMenu } = require("./application-menu.cjs");
 const { createDocumentTransition } = require("./document-transition.cjs");
 const { setupVideoExport } = require("./video-export.cjs");
+const { captureRasterTiles, TILE_WIDTH: EXPORT_RASTER_TILE_WIDTH, TILE_HEIGHT: EXPORT_RASTER_TILE_HEIGHT } = require("./raster-capture.cjs");
 const desktopLocale = createDesktopLocale();
 const nativeTr = desktopLocale.tr;
 
@@ -25,8 +26,6 @@ const MAX_EXPORT_TOTAL_BYTES = 512 * 1024 * 1024;
 const MAX_EXPORT_RASTER_DIMENSION = 32767;
 const MAX_EXPORT_RASTER_PIXELS = 32_000_000;
 const EXPORT_JPEG_QUALITY = 92;
-const EXPORT_RASTER_TILE_WIDTH = 1024;
-const EXPORT_RASTER_TILE_HEIGHT = 768;
 const EXPORT_FORMATS = new Set(["pdf", "svg", "png", "jpg"]);
 const SMOKE_TEST = process.argv.includes("--smoke-test");
 // Automated and interactive verification share an explicitly isolated store.
@@ -142,6 +141,7 @@ async function handleAppRequest(request) {
   try {
     const url = new URL(request.url);
     if (url.host === "renderer" && url.pathname.startsWith("/__local_audio__/")) return desktopAudio.response(url.pathname.slice("/__local_audio__/".length));
+    if (url.host === "renderer" && url.pathname.startsWith("/__video_media__/")) return videoExport.response(url.pathname.slice("/__video_media__/".length));
     if (url.host === "export") {
       const key = url.pathname.replace(/^\/+/, "");
       const document = pendingRasterDocuments.get(key);
@@ -408,43 +408,6 @@ function scoreExportRasterDocument(markup, cssText, size, transparentBackground)
   const background = transparentBackground ? "transparent" : "#fff";
   const safeCss = cssText.replaceAll("</style", "<\\/style");
   return `<!doctype html><html><head><meta charset="utf-8"><style>${safeCss}</style><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:${background}!important}#scoreExportRasterStage{position:fixed;left:0;top:0;width:${size.width}px;height:${size.height}px;transform:translate(0,0)}#scoreExportRasterStage>.score-export-page{display:block!important;margin:0!important;background:${background}!important;background-image:none!important;box-shadow:none!important;transform-origin:top left!important;transform:scale(${scaleX},${scaleY})!important}</style></head><body class="editor-ready"><div id="scoreExportRasterStage">${markup}</div></body></html>`;
-}
-
-async function captureRasterTiles(webContents, size, viewport, transparentBackground) {
-  const tileStepWidth = Math.max(1, Math.min(EXPORT_RASTER_TILE_WIDTH, Math.floor(viewport.width)));
-  const tileStepHeight = Math.max(1, Math.min(EXPORT_RASTER_TILE_HEIGHT, Math.floor(viewport.height)));
-  const bitmap = Buffer.alloc(size.width * size.height * 4, transparentBackground ? 0x00 : 0xff);
-  for (let top = 0; top < size.height; top += tileStepHeight) {
-    const tileHeight = Math.min(tileStepHeight, size.height - top);
-    for (let left = 0; left < size.width; left += tileStepWidth) {
-      const tileWidth = Math.min(tileStepWidth, size.width - left);
-      await webContents.executeJavaScript(`new Promise((resolve) => {
-        document.querySelector("#scoreExportRasterStage").style.transform = "translate(${-left}px, ${-top}px)";
-        requestAnimationFrame(() => requestAnimationFrame(resolve));
-      })`, true);
-      const tile = await webContents.capturePage(
-        { x: 0, y: 0, width: tileWidth, height: tileHeight },
-        { stayHidden: true, stayAwake: true },
-      );
-      if (tile.isEmpty()) throw new Error("Electron could not capture an exported page tile.");
-      const tileSize = tile.getSize(1);
-      if (tileSize.width !== tileWidth || tileSize.height !== tileHeight) {
-        throw new Error("Electron captured an exported page tile at an unexpected size.");
-      }
-      const tileBitmap = tile.toBitmap({ scaleFactor: 1 });
-      if (tileBitmap.byteLength !== tileWidth * tileHeight * 4) {
-        throw new Error("Electron returned an invalid exported page tile.");
-      }
-      for (let row = 0; row < tileHeight; row += 1) {
-        const sourceStart = row * tileWidth * 4;
-        const targetStart = ((top + row) * size.width + left) * 4;
-        tileBitmap.copy(bitmap, targetStart, sourceStart, sourceStart + tileWidth * 4);
-      }
-    }
-  }
-  const image = nativeImage.createFromBitmap(bitmap, { width: size.width, height: size.height, scaleFactor: 1 });
-  if (image.isEmpty()) throw new Error("Electron could not assemble the exported page tiles.");
-  return image;
 }
 
 async function rasterizeScoreExportPage(value, cssText, format, size, pngBackground) {

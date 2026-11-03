@@ -20,7 +20,7 @@ function supportedBgmFile(file) {
   return SUPPORTED_BGM_EXTENSION.test(file.name) || SUPPORTED_BGM_TYPE.has(String(file.type ?? "").toLowerCase());
 }
 
-export function createRendererPlayback({ canvas, onStateChange, requestScroll, closePopovers, pianoPlayer }) {
+export function createRendererPlayback({ canvas, onStateChange, requestScroll, closePopovers, pianoPlayer, mediaElement }) {
   let result = null;
   let stableTempo = false;
   let timelineDocument = null;
@@ -58,7 +58,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
   let selectionSerial = 0;
   let countInEnabled = false;
   let countdown = null;
-  const bgmAudio = new Audio();
+  const bgmAudio = mediaElement ?? new Audio();
   bgmAudio.preload = "auto";
   bgmAudio.volume = 1;
 
@@ -101,6 +101,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
       bgmReady,
       bgmDurationMs: Number.isFinite(bgmAudio.duration) ? bgmAudio.duration * 1000 : null,
       bgmFileName,
+      videoReady: Boolean(mediaElement && bgmReady && /\.mp4$/i.test(bgmFileName)),
       bgmVolume,
       notice,
       countdown,
@@ -527,7 +528,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
   }
 
   async function loadBgmFile(file) {
-    if (!supportedBgmFile(file)) {
+    if (!supportedBgmFile(file) && !(mediaElement && /\.mp4$/i.test(file?.name ?? ""))) {
       setNotice("bgm-invalid", 2500);
       return;
     }
@@ -759,6 +760,8 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
     loadBgmFile,
     clearBgmFile() { bgmLoadId += 1; cancelBgmLoad?.(); resetBgmSource(); emit(); },
     getState: state,
+    getPreviousEntry(entry) { return plan.entries[plan.entries.indexOf(entry) - 1] ?? null; },
+    getPlaybackEntries: () => plan.entries,
     async getExportSnapshot() {
       if (bgmLoadPromise) await bgmLoadPromise.catch(() => {});
       return { timelineDocument, temporaryOffset, userOffset, pianoEnabled, bgmVolume,

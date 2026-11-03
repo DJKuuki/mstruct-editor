@@ -1,8 +1,9 @@
 const WIDTH = 1920, HEIGHT = 1080, FPS = 30, SAMPLE_RATE = 48000;
 
-function videoEncodingArguments({ frameCount, bgmPath, pianoPath, bgmVolume = 100, output }) {
-  const duration = frameCount / FPS;
-  const args = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-f", "rawvideo", "-pixel_format", "bgra", "-video_size", `${WIDTH}x${HEIGHT}`, "-framerate", String(FPS), "-i", "pipe:0"];
+function videoEncodingArguments({ frameCount, fps = FPS, bgmPath, pianoPath, bgmVolume = 100, output }) {
+  if (fps !== 30 && fps !== 60) throw new Error("Invalid video frame rate.");
+  const duration = frameCount / fps;
+  const args = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-f", "rawvideo", "-pixel_format", "bgra", "-video_size", `${WIDTH}x${HEIGHT}`, "-framerate", String(fps), "-i", "pipe:0"];
   const tracks = [];
   if (bgmPath) { args.push("-i", bgmPath); tracks.push({ volume: Math.min(100, Math.max(0, bgmVolume)) / 100 }); }
   if (pianoPath) { args.push("-f", "f32le", "-ar", String(SAMPLE_RATE), "-ac", "2", "-i", pianoPath); tracks.push({ volume: 1 }); }
@@ -16,7 +17,7 @@ function videoEncodingArguments({ frameCount, bgmPath, pianoPath, bgmVolume = 10
     filters.push(`${mix}alimiter=limit=0.794328:level=0:latency=1,apad,atrim=duration=${duration}[audio]`);
     args.push("-filter_complex", filters.join(";"), "-map", "[audio]", "-c:a", "aac", "-b:a", "192k");
   } else args.push("-an");
-  args.push("-c:v", "h264_mf", "-hw_encoding", "0", "-pix_fmt", "nv12", "-b:v", "10000000", "-g", "60", "-t", String(duration), "-movflags", "+faststart", output);
+  args.push("-c:v", "h264_mf", "-hw_encoding", "0", "-pix_fmt", "nv12", "-b:v", "10000000", "-g", String(fps * 2), "-t", String(duration), "-movflags", "+faststart", output);
   return args;
 }
 

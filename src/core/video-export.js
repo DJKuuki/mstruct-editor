@@ -3,7 +3,8 @@ import { buildPlaybackPlan, buildMstructtimePlaybackPlan } from "./mstruct-playb
 export const VIDEO_EXPORT = Object.freeze({ width: 1920, height: 1080, fps: 30, sampleRate: 48000, channels: 2 });
 
 /** Use the same route and offsets as preview; the encoder owns only frame timing. */
-export function createVideoExportPlan(result, metadata, playback = {}) {
+export function createVideoExportPlan(result, metadata, playback = {}, fps = VIDEO_EXPORT.fps) {
+  if (fps !== 30 && fps !== 60) throw new Error("Invalid video frame rate.");
   const offset = (playback.userOffset ?? 0) + (playback.temporaryOffset ?? 0);
   const plan = metadata.isStableTempo
     ? buildPlaybackPlan(result, offset + (Number(metadata.offset) || 0))
@@ -11,7 +12,7 @@ export function createVideoExportPlan(result, metadata, playback = {}) {
   if (!result?.ok || !plan.ready || plan.durationMs <= 0) throw new Error("videoPlaybackUnavailable");
   const durationMs = Math.max(plan.durationMs, Number(playback.bgmDurationMs) || 0);
   if (!Number.isFinite(durationMs) || durationMs > 6 * 60 * 60 * 1000) throw new Error("videoTooLong");
-  return { ...VIDEO_EXPORT, plan, durationMs, frameCount: Math.ceil(durationMs * VIDEO_EXPORT.fps / 1000) };
+  return { ...VIDEO_EXPORT, fps, plan, durationMs, frameCount: Math.ceil(durationMs * fps / 1000) };
 }
 
 export function pianoExportEvents(plan) {

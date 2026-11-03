@@ -12,8 +12,9 @@ import { createRendererSearch } from "./renderer-search.js";
 import { RENDERER_LAYERS_CHANNEL } from "../core/renderer-layers.js";
 import { RENDERER_AUDIO_ICONS } from "./renderer-audio-icons.js";
 import { observeRendererNavHeight } from "./renderer-nav-layout.js";
+import { createRendererPresentation } from "./renderer-presentation.js";
 
-export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPreviewMode = false, postToHost, closePopovers, pianoPlayer, getLocale, getComments, getChordPreferences, renderCommentText, getSearchOptions, getRendererLayers, onRendererLayersChange, makeTagLabel, makeFormSymbol, makeBpmLabel, appendChordNotation, openChordPopover, setFullscreenPopovers, onFullscreenLayoutChange, onTimelineChange, onTimelineManage, onTimelineDownload, onTimelineHistory, onPlaybackState, onChooseBgm, onTimelineAudioChange }) {
+export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPreviewMode = false, presentationEnabled = false, videoPresentationEnabled = false, onPresentationModeChange, onChooseVideo, postToHost, closePopovers, pianoPlayer, getLocale, getComments, getChordPreferences, renderCommentText, getSearchOptions, getRendererLayers, onRendererLayersChange, makeTagLabel, makeFormSymbol, makeBpmLabel, appendChordNotation, openChordPopover, setFullscreenPopovers, onFullscreenLayoutChange, onPresentationGeometryChange, onTimelineChange, onTimelineManage, onTimelineDownload, onTimelineHistory, onPlaybackState, onChooseBgm, onTimelineAudioChange }) {
   const nav = document.querySelector(".renderer-nav");
   const stopObservingNavHeight = observeRendererNavHeight(nav);
   const timeline = document.querySelector("#rendererTimeline");
@@ -53,6 +54,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
   const layersPanel = document.querySelector("#rendererLayersPanel");
   const layerInputs = [...layersPanel.querySelectorAll("[data-renderer-layer]")];
   const layersChannel = typeof BroadcastChannel === "function" ? new BroadcastChannel(RENDERER_LAYERS_CHANNEL) : null;
+  let presentation = null;
   const fullscreen = createRendererFullscreen({
     rendererPanel: document.querySelector("#rendererPanel"),
     canvas: rendererCanvas,
@@ -70,8 +72,21 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
     openChordPopover,
     setFullscreenPopovers,
     onLayoutChange: onFullscreenLayoutChange,
+    onActiveChange: value => presentation?.setActive(value),
     desktopPreviewMode,
     postToHost,
+  });
+  if (presentationEnabled) presentation = createRendererPresentation({
+    panel: document.querySelector("#rendererPanel"), canvas: rendererCanvas, fullscreenButton, fileButton: bgmFile, tr,
+    enter: () => fullscreen.enter(), videoEnabled: videoPresentationEnabled, onChooseVideo,
+    onGeometryChange: onPresentationGeometryChange,
+    onModeChange: (value, mode) => {
+      onPresentationModeChange?.(value);
+      postToHost("presentation-mode", { mode });
+      onFullscreenLayoutChange?.({ force: true });
+    },
+    getPreviousEntry: entry => playback.getPreviousEntry(entry),
+    getPlaybackEntries: () => playback.getPlaybackEntries(),
   });
   let committedOffset = 0;
   let timelineEditing = false;
@@ -126,10 +141,12 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       : '<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>';
     postToHost("playback-state", { playback: state });
     fullscreen.update(state, activeEntry);
+    presentation?.update(state, activeEntry);
     onPlaybackState?.(state, activeEntry);
   }
 
   function requestScroll(element) {
+    if (rendererCanvas.dataset.fixedScale === "true") return;
     const scrollTarget = element.closest(".score-system") ?? element;
     const rect = scrollTarget.getBoundingClientRect();
     if (isHostedViewer && !document.body.classList.contains("renderer-fullscreen-external")) {
@@ -168,6 +185,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
     requestScroll,
     closePopovers,
     pianoPlayer,
+    mediaElement: presentation?.mediaElement,
   });
   const search = createRendererSearch({
     canvas: rendererCanvas,
@@ -360,6 +378,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
     refreshLocale: () => {
       reflectPlayback(latestState);
       fullscreen.refresh();
+      presentation?.refreshLocale();
       search.refreshLocale();
     },
     updateDocument({ result, isStableTempo, globalOffset, userOffset, timelineDocument }) {
@@ -368,6 +387,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       playback.setDocument({ result, stableTempo: isStableTempo, globalOffset, userOffset, timelineDocument });
       search.updateDocument(result);
       fullscreen.refresh();
+      presentation?.refresh();
     },
     setTimelines(items = [], selectedFileName = "") {
       const placeholder = document.createElement("option");
@@ -400,9 +420,10 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       playback.refreshTimelineDocument(value);
     },
     getPlaybackState: playback.getState,
-    getExportSnapshot: playback.getExportSnapshot,
+    async getExportSnapshot() { return { ...await playback.getExportSnapshot(), presentationMode: presentation?.getMode() ?? "default" }; },
     async renderPresentationAt(value) {
       playback.renderAt(value);
+      await presentation?.seekVideo(value);
       await fullscreen.whenReady();
     },
     seekPlayback: playback.seek,
@@ -414,9 +435,11 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
     },
     refreshRenderedScore() {
       playback.refreshRenderedScore();
+      presentation?.refresh();
       search.refreshRenderedScore();
       fullscreen.refresh();
     },
+    refreshPresentationContent() { presentation?.refreshContent(); },
     handleCommand(command, value) {
       if (["play", "pause", "stop"].includes(command)) playback.run(command);
       if (command === "select") playback.setSelecting(value);
@@ -424,13 +447,14 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       if (command === "offset") playback.setTemporaryOffset(value);
       if (command === "piano") playback.setPianoEnabled(value);
       if (command === "volume") playback.setBgmVolume(value);
-      if (command === "bgm-file") void playback.loadBgmFile(value);
+      if (command === "bgm-file") return playback.loadBgmFile(value);
       if (command === "bgm-clear") playback.clearBgmFile();
       if (command === "scrub-start") playback.beginScrub(value);
       if (command === "scrub-preview") playback.previewScrub(value);
       if (command === "scrub-commit") playback.commitScrub(value);
       if (command === "scrub-cancel") playback.cancelScrub();
       if (command === "fullscreen-view") fullscreen.setExternalFullscreen(value);
+      if (command === "presentation-mode") presentation?.setMode(value);
       if (command === "layers") updateLayers(value);
       if (command === "search") search.run(value);
       if (command === "search-set") search.run(value, { advance: false });
@@ -452,6 +476,7 @@ export function setupRendererNav({ tr, rendererCanvas, isHostedViewer, desktopPr
       playback.destroy();
       search.destroy();
       fullscreen.destroy();
+      presentation?.destroy();
     },
   };
 }

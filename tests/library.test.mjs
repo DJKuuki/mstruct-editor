@@ -189,7 +189,13 @@ test("audio adapter finds stable/timeline recordings, remembers choices, copies 
   const response = await audio.response(result.url.split("/").at(-1)); assert.deepEqual(Buffer.from(await response.arrayBuffer()), alternate);
   selections.push(external); answers.push(0, 1); assert.equal((await choose({ stable: true })).cancelled, true); assert.deepEqual(await readFile(path.join(root, "Analysis.wav")), recording);
   selections.push(external); answers.push(0, 0); await choose({ stable: true }); assert.deepEqual(await readFile(path.join(root, "Analysis.wav")), alternate);
-  await writeFile(path.join(root, "Analysis.mp3"), recording); answers.push(1); result = await find({ stable: true }); assert.ok(["Analysis.mp3", "Analysis.wav"].includes(result.name));
+  await writeFile(path.join(root, "Analysis.mp3"), recording); result = await find({ stable: true }); assert.equal(result.name, "Analysis.wav");
+  await writeFile(path.join(root, "Analysis.mp4"), alternate); result = await find({ stable: true }); assert.equal(result.name, "Analysis.mp4");
+  const videoResponse = await audio.response(result.url.split("/").at(-1));
+  assert.equal(videoResponse.headers.get("content-type"), "video/mp4");
+  assert.deepEqual(Buffer.from(await videoResponse.arrayBuffer()), alternate);
+  await writeFile(path.join(root, "timeline-1.mp4"), alternate);
+  result = await find({ stable: false, timeline: "timeline-1.mstructtime" }); assert.equal(result.name, "timeline-1.mp4");
   assert.deepEqual(await readFile(external), alternate);
 });
 test("an extracted public package registers status/baselines, hides rules and preserves edited or missing files", async () => {

@@ -6,16 +6,25 @@ export function setupDesktopVideoExport({ api, tr, getSnapshot }) {
   const dialog = document.createElement("dialog");
   dialog.className = "video-export-dialog";
   const title = document.createElement("h2"), description = document.createElement("p");
+  const frameRateLabel = document.createElement("label"), frameRateText = document.createElement("span");
+  const frameRate = document.createElement("select");
+  frameRate.name = "fps";
+  for (const fps of [30, 60]) frameRate.add(new Option(String(fps), String(fps)));
+  frameRateLabel.className = "video-export-frame-rate";
+  frameRateLabel.append(frameRateText, frameRate);
   const progress = document.createElement("progress"); progress.max = 100; progress.value = 0;
   const status = document.createElement("p"); status.setAttribute("role", "status");
   const actions = document.createElement("footer");
   const cancel = document.createElement("button"), start = document.createElement("button");
   for (const button of [cancel, start]) button.type = "button";
-  actions.append(cancel, start); dialog.append(title, description, progress, status, actions); document.body.append(dialog);
-  let running = false;
+  actions.append(cancel, start); dialog.append(title, description, frameRateLabel, progress, status, actions); document.body.append(dialog);
+  let running = false, completed = false;
   const refresh = () => {
     title.textContent = tr("videoExportTitle"); description.textContent = tr("videoExportDescription");
-    cancel.textContent = tr(running ? "videoCancelExport" : "cancel"); start.textContent = tr("videoExportStart");
+    frameRateText.textContent = tr("videoExportFrameRate");
+    for (const option of frameRate.options) option.textContent = tr("videoExportFps", { fps: option.value });
+    frameRate.disabled = running;
+    cancel.textContent = tr(running ? "videoCancelExport" : completed ? "videoExportConfirm" : "cancel"); start.textContent = tr("videoExportStart");
   };
   const stop = () => { if (running) void api.cancelVideoExport(); else dialog.close(); };
   cancel.addEventListener("click", stop);
@@ -27,12 +36,13 @@ export function setupDesktopVideoExport({ api, tr, getSnapshot }) {
   });
   start.addEventListener("click", async () => {
     if (running) return;
-    running = true; start.disabled = true; progress.value = 0; refresh(); status.textContent = tr("videoPreparing");
+    running = true; completed = false; start.disabled = true; progress.value = 0; refresh(); status.textContent = tr("videoPreparing");
     try {
       const snapshot = await getSnapshot();
       const { bgmFile, ...playback } = snapshot.playback;
       const bgm = bgmFile ? { name: bgmFile.name, bytes: await bgmFile.arrayBuffer() } : null;
-      const result = await api.startVideoExport({ ...snapshot, playback, bgm });
+      const result = await api.startVideoExport({ ...snapshot, fps: Number(frameRate.value), playback, bgm });
+      completed = !result.cancelled;
       progress.value = result.cancelled ? 0 : 100;
       status.textContent = tr(result.cancelled ? "videoExportCancelled" : "videoExportComplete", { path: result.path });
     } catch (error) { status.textContent = `${tr("videoExportFailed")} ${tr(error.message)}`; }
@@ -40,6 +50,7 @@ export function setupDesktopVideoExport({ api, tr, getSnapshot }) {
   });
   api.onCommand(command => {
     if (command !== "export:mp4" || dialog.open) return;
+    completed = false;
     refresh(); progress.value = 0; status.textContent = tr("videoExportAudioHelp"); dialog.showModal();
   });
   return { close: stop };

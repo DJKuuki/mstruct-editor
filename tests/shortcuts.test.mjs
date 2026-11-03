@@ -26,6 +26,10 @@ test("桌面 Ctrl+滚轮沿用乐谱缩放步长与上下限，不拦截普通�
   assert.equal(scale, 105);
   assert.equal(wheel(1), true);
   assert.equal(scale, 100);
+  target.dataset = { fixedScale: "true" };
+  assert.equal(wheel(-120), true);
+  assert.equal(scale, 100);
+  target.dataset.fixedScale = "false";
   for (const modifiers of [{ ctrlKey: false }, { altKey: true }, { metaKey: true }]) assert.equal(wheel(-120, modifiers), false);
   assert.equal(wheel(0), false);
   assert.equal(scale, 100);

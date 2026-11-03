@@ -13,6 +13,39 @@ import {
 import { playbackEntryInformation } from "../src/core/mstruct-playback-info.js";
 import { createRendererPlayback } from "../src/ui/renderer-playback.js";
 
+test("injected desktop video follows the existing playback clock, volume and source lifecycle", async t => {
+  class Media extends EventTarget {
+    duration = 4; currentTime = 0; paused = true; ended = false;
+    pause() { this.paused = true; }
+    async play() { this.paused = false; }
+    load() { if (this.src) queueMicrotask(() => this.dispatchEvent(new Event("canplay"))); }
+    removeAttribute() { this.src = ""; }
+  }
+  const globals = ["CSS", "requestAnimationFrame", "cancelAnimationFrame"];
+  const previous = Object.fromEntries(globals.map(key => [key, globalThis[key]]));
+  globalThis.CSS = { escape: String };
+  globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
+  t.after(() => { for (const key of globals) { if (previous[key] === undefined) delete globalThis[key]; else globalThis[key] = previous[key]; } });
+  const canvas = { classList: { add() {}, remove() {}, toggle() {} }, addEventListener() {}, removeEventListener() {}, querySelector: () => null };
+  const media = new Media();
+  const player = createRendererPlayback({ canvas, mediaElement: media, onStateChange() {}, requestScroll() {}, closePopovers() {} });
+  t.after(() => player.destroy());
+  player.setDocument({ result: parseMstruct("{BN:1}{TS:4/4}{D:1}{BPM:1/4=120}{TC:C}C|I;", { isStableTempo: true }), stableTempo: true, userOffset: 0 });
+  assert.equal(player.getState().enabled, true);
+  const file = new File(["fixture"], "clip.mp4", { type: "video/mp4" });
+  await player.loadBgmFile(file);
+  assert.equal(player.getState().videoReady, true);
+  assert.equal((await player.getExportSnapshot()).bgmFile, file);
+  player.setBgmVolume(25); assert.equal(media.volume, .25);
+  player.run("play"); await Promise.resolve(); assert.equal(media.paused, false);
+  player.run("pause"); assert.equal(media.paused, true);
+  player.seek(1000); assert.equal(media.currentTime, 1);
+  player.run("stop"); assert.equal(media.currentTime, 0);
+  player.clearBgmFile(); assert.equal(player.getState().videoReady, false);
+  await player.loadBgmFile(new File(["fixture"], "clip.wav", { type: "audio/wav" }));
+  assert.equal(player.getState().bgmReady, true); assert.equal(player.getState().videoReady, false);
+});
+
 test("钢琴跨小节及字段级延音合并实际时长，同音重击与静音事件仍分开", () => {
   const result = parseMstruct("{BN:15}{TS:4/4}{D:1}{BPM:1/4=60}{TC:Bb}Bbm|i7;{BPM:1/4=120}-;[C:-|R:V];Bbm|i7;0;-;N.C.;-;X;-;Clus;-;", { isStableTempo: true });
   assert.equal(result.ok, true, JSON.stringify(result.errors));

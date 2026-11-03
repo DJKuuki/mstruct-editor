@@ -5,6 +5,7 @@ export function setupDesktopScoreScale({ target, getScale = getRendererScaleSnap
   function onWheel(event) {
     if (!event.ctrlKey || event.altKey || event.metaKey || !Number.isFinite(event.deltaY) || event.deltaY === 0) return;
     event.preventDefault();
+    if (target.dataset?.fixedScale === "true") return;
     const next = normalizeRendererScale(getScale() - Math.sign(event.deltaY) * RENDERER_SCALE_STEP);
     if (next !== getScale()) updateScale(next);
   }

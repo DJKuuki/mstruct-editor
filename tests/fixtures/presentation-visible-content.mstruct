@@ -1,0 +1,31 @@
+METADATA:
+{MSTRUCT_FORMAT_VERSION}1
+{MSTRUCT_PROFILE_ID}org.mstruct.official/rulesets/1.0.0
+{MSTRUCT_PROFILE_HASH}sha256:907259128e979e2e6c1241924915e4a84e1bceaba3aeec364ea10c322aef3dfc
+{SONG_NAME}可见内容高度 / Visible Content Height
+{VERSION_NAME}Renderer Test
+{IS_STABLE_TEMPO}True
+{OFFSET}0
+END_METADATA
+
+MAIN:
+{BN:1}{TS:4/4}{D:1/4}{TEMPO:Allegro}{BPM:1/4=120}{TC:C}
+[COMMENT:1]<Constant_Structure><Polytonality><Tonality>C|I,
+</Constant_Structure></Polytonality></Tonality>[/COMMENT][NR:P]Cm|i,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+C|I,Dm7|ii7,G7|V7,C|I;
+END_MAIN
+
+COMMENT:
+[COMMENT:1<zh_cn>]
+速度、标签、注释持续线和新里曼弧线离开视野后，同一谱行中的空白应立即收紧。
+[/COMMENT:1<zh_cn>]
+[COMMENT:1<en>]
+The strip contracts within the same system as tempo, tags, comment lines and the neo-Riemannian arc leave the viewport.
+[/COMMENT:1<en>]
+END_COMMENT
