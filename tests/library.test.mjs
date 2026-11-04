@@ -85,6 +85,54 @@ test("first and repeated import retain stable sources and rules without duplicat
   assert.equal((await apply(store, value)).written, 0);
   const scanned = await store.scan(); assert.equal(scanned.files.length, 1); assert.equal(Object.keys(scanned.state.sources).length, 1); assert.equal((await store.rules()).length, 1);
 });
+
+test("ZIP import accepts equivalent manifest JSON while retaining existing rule bytes", async () => {
+  const { root, store } = await library(), value = bundle(await document());
+  const ruleManifest = `rules/${profile.manifest.bundleHash.slice(7)}/manifest.json`;
+  const localManifest = path.join(root, `.${ruleManifest}`);
+  await apply(store, value);
+  const original = await readFile(localManifest);
+  const formatted = Buffer.from(JSON.stringify(Object.fromEntries(Object.entries(profile.manifest).reverse()), null, 2) + "\r\n");
+  value.files.set(ruleManifest, formatted);
+  Object.assign(value.manifest.files.find(entry => entry.path === ruleManifest), { bytes: formatted.length, sha256: digest(formatted) });
+  value.files.set("manifest.json", Buffer.from(JSON.stringify(value.manifest)));
+  const incoming = readPublicZip(zip(value.files));
+  await validateLibraryPackage(Object.fromEntries([...incoming.files].map(([name, data]) => [name, data.toString()])), incoming.catalog);
+  assert.equal((await apply(store, incoming)).written, 0);
+  assert.equal((await apply(store, incoming)).written, 0);
+  assert.deepEqual(await readFile(localManifest), original);
+});
+
+test("rule content differences and malformed manifests still abort the whole import", async () => {
+  for (const [name, corrupt] of [
+    ["manifest.json", JSON.stringify({ ...profile.manifest, description: "different metadata" })],
+    ["manifest.json", "{invalid JSON"],
+    ["roman-basic.csv", profile.files["roman-basic.csv"] + "\n"],
+  ]) {
+    const { root, store } = await library(), initial = bundle(await document());
+    await apply(store, initial);
+    const location = initial.catalog.analyses[0].path;
+    await writeFile(path.join(root, `.rules/${profile.manifest.bundleHash.slice(7)}/${name}`), corrupt);
+    const update = bundle(await document("Analysis", "Song", "G")), plan = await store.planImport(update);
+    const before = await readFile(path.join(root, ".mstruct-library/state.json"));
+    await assert.rejects(store.applyImport(update, plan), /library-rules-immutable/);
+    assert.deepEqual(await readFile(path.join(root, location)), initial.files.get(location));
+    assert.deepEqual(await readFile(path.join(root, ".mstruct-library/state.json")), before);
+  }
+});
+
+test("extracted package adoption reuses an equivalent hidden manifest", async () => {
+  const { root, store } = await library(), value = bundle(await document());
+  for (const [relative, data] of value.files) { await mkdir(path.dirname(path.join(root, relative)), { recursive: true }); await writeFile(path.join(root, relative), data); }
+  const hidden = path.join(root, `.rules/${profile.manifest.bundleHash.slice(7)}/manifest.json`);
+  const formatted = JSON.stringify(profile.manifest, null, 2) + "\n";
+  await mkdir(path.dirname(hidden), { recursive: true }); await writeFile(hidden, formatted);
+  const extracted = await readExtractedPackage(root);
+  assert.equal(await store.adoptExtracted(extracted), true);
+  assert.equal(await readFile(hidden, "utf8"), formatted);
+  assert.equal((await store.scan()).files.length, 1);
+  assert.equal((await apply(store, value)).written, 0);
+});
 test("three-way conflicts remember keep-local and ask again only for later remote content", async () => {
   const { root, store } = await library(), first = bundle(await document()); await apply(store, first);
   const location = first.catalog.analyses[0].path, local = await document("Analysis", "Song", "F"); await writeFile(path.join(root, location), local);

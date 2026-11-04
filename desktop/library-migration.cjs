@@ -1,7 +1,7 @@
 const fs = require("node:fs/promises");
 const { randomUUID } = require("node:crypto");
-const { isDeepStrictEqual } = require("node:util");
 const { INTERNAL, digest, safePath, readOptional } = require("./library-paths.cjs");
+const { assertMatchingRuleFile } = require("./library-rules.cjs");
 
 /** Validate filesystem writes and retain originals. Music validation belongs to the shared core. */
 async function migrationWrites(root, payload) {
@@ -32,10 +32,7 @@ async function migrationWrites(root, payload) {
     if (!/^(?:[a-z][a-z0-9-]*\.csv|manifest\.json)$/.test(name) || typeof text !== "string") throw Error("library-rules");
     const relative = `${directory}/${name}`;
     const old = await readOptional(await safePath(root, relative, { internal: true }));
-    if (old && digest(old) !== digest(text)) {
-      // Manifest whitespace can differ between valid packages.
-      if (name !== "manifest.json" || !isDeepStrictEqual(JSON.parse(old), profile.manifest)) throw Error("library-rules-immutable");
-    }
+    assertMatchingRuleFile(name, old, text);
     if (!old) writes.push({ path: relative, data: text, expected: null });
   }
   writes.push({ path: `${backup}/manifest.json`, data: JSON.stringify({ version: 1, createdAt: new Date().toISOString(), target: profile.manifest, files: originals }), expected: null });

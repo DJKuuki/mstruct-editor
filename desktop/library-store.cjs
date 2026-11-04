@@ -3,6 +3,7 @@ const path = require("node:path");
 const { INTERNAL, digest, validName, safePath, readOptional, assertVacant } = require("./library-paths.cjs");
 const { atomicWrite, transact, recover } = require("./library-transaction.cjs");
 const { migrationWrites } = require("./library-migration.cjs");
+const { assertMatchingRuleFile } = require("./library-rules.cjs");
 
 const STATE = `${INTERNAL}/state.json`, CACHE = `${INTERNAL}/index.json`;
 const emptyState = () => ({ version: 1, sources: {}, audio: {}, snapshot: null });
@@ -191,7 +192,7 @@ function createLibraryStore(root) {
     }
     for (const [relative, data] of bundle.files) if (relative.startsWith("rules/")) {
       const target = `.${relative}`, old = await readOptional(await safePath(root, target, { internal: true }));
-      if (old && digest(old) !== digest(data)) throw Error("library-rules-immutable");
+      assertMatchingRuleFile(relative, old, data);
       if (!old) put({ path: target, data, expected: null });
     }
     state.snapshot = { sha256: bundle.sha256, generatedAt: bundle.catalog.generatedAt, checkedAt: new Date().toISOString() };
@@ -235,7 +236,7 @@ function createLibraryStore(root) {
     }
     for (const [relative, data] of bundle.files) if (relative.startsWith("rules/")) {
       const target = `.${relative}`, old = await readOptional(await safePath(root, target, { internal: true }));
-      if (old && digest(old) !== digest(data)) throw Error("library-rules-immutable");
+      assertMatchingRuleFile(relative, old, data);
       if (!old) changes.push({ path: target, data, expected: null });
       if (bundle.locations.get(relative) === relative) changes.push({ path: relative, data: null, expected: digest(data) });
     }

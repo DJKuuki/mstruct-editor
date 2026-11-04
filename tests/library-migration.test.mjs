@@ -49,6 +49,10 @@ async function fixture() {
 
 test("migration retains originals and rules, rebuilds from changed files and is idempotent", async () => {
   const { root, store, changes } = await fixture();
+  const manifestPath = path.join(root, `.rules/${target.manifest.bundleHash.slice(7)}/manifest.json`);
+  const formattedManifest = JSON.stringify(target.manifest, null, 2) + "\n";
+  await filesystem.mkdir(path.dirname(manifestPath), { recursive: true });
+  await writeFile(manifestPath, formattedManifest);
   await store.writeCache({ old: true });
   const result = await store.migrate({ root, changes, profile: target });
   assert.equal(result.written, 1);
@@ -57,6 +61,7 @@ test("migration retains originals and rules, rebuilds from changed files and is 
   assert.equal(await readFile(path.join(root, "Audio.mp3"), "utf8"), "audio");
   assert.equal(await readFile(path.join(root, "Timing.mstructtime"), "utf8"), "timeline");
   assert.equal((await store.rules())[0].manifest.bundleHash, target.manifest.bundleHash);
+  assert.equal(await readFile(manifestPath, "utf8"), formattedManifest);
   const scanned = await store.scan();
   assert.equal(scanned.cache, null);
   assert.deepEqual((await prepareLibraryMigration(scanned.files, target)).records.map(record => record.status), ["current"]);
