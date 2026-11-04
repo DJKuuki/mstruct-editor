@@ -61,6 +61,10 @@ The build script defaults to npmmirror for Electron and electron-builder binary 
 
 Manually run **macOS standalone** in this editor repository's GitHub Actions. Native Apple Silicon and Intel runners produce architecture-labelled DMG, ZIP and SHA-256 files. The version comes from `package.json`; the workflow neither increments it nor publishes a Release. macOS 13 or later is required. Private-repository runs use the account's Actions allowance.
 
+默认同时构建两个架构，也可用 `architecture` 选择只构建 arm64 或 x64。Apple 芯片使用 `macos-26`，Intel 使用 `macos-15-intel`；最低运行系统仍为 macOS 13，两个构建环境的编码器缓存独立。
+
+Both architectures are built by default; use `architecture` to build only arm64 or x64. Apple Silicon uses `macos-26`, while Intel uses `macos-15-intel`. The minimum supported runtime remains macOS 13, and encoder caches are separate for each build environment.
+
 FFmpeg 按 macOS 构建环境、CPU 架构及编译脚本指纹缓存；指纹覆盖固定源码提交和编译参数。缓存命中后仍校验来源、架构、参数和全部文件摘要，通过后直接复用。首次构建、脚本／源码变化、缓存缺失或校验失败时才编译；验证完成即保存编码器缓存，不依赖后续应用测试是否通过。
 
 FFmpeg is cached by macOS build environment, CPU architecture and build-script fingerprint, which includes the pinned source revision and compiler options. Cache hits are reused only after checking provenance, architecture, configuration and all file hashes. Compilation is needed only on the first build, changed scripts/source, a missing cache or failed validation. The verified encoder cache is saved before subsequent application tests.

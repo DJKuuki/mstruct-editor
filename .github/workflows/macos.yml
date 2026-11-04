@@ -2,12 +2,18 @@ name: macOS standalone
 
 on:
   workflow_dispatch:
+    inputs:
+      architecture:
+        description: Architecture to build
+        type: choice
+        options: [both, arm64, x64]
+        default: both
 
 permissions:
   contents: read
 
 concurrency:
-  group: macos-${{ github.ref }}
+  group: macos-${{ github.ref }}-${{ inputs.architecture || 'both' }}
   cancel-in-progress: false
 
 jobs:
@@ -16,12 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runner: macos-15
-            arch: arm64
-          - runner: macos-15-intel
-            arch: x64
-    runs-on: ${{ matrix.runner }}
+        arch: ${{ fromJSON(inputs.architecture == 'arm64' && '["arm64"]' || inputs.architecture == 'x64' && '["x64"]' || '["arm64","x64"]') }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'macos-26' || 'macos-15-intel' }}
     timeout-minutes: 45
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
@@ -42,7 +44,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: desktop/assets/video-encoder
-          key: ffmpeg-macos-15-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
+          key: ffmpeg-${{ matrix.arch == 'arm64' && 'macos-26' || 'macos-15' }}-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
       - name: Prepare offline assets and native FFmpeg
         run: npm run desktop:prepare
       - name: Cache verified video encoder
@@ -50,7 +52,7 @@ jobs:
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: desktop/assets/video-encoder
-          key: ffmpeg-macos-15-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
+          key: ffmpeg-${{ matrix.arch == 'arm64' && 'macos-26' || 'macos-15' }}-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
       - run: npm test
       - name: Build DMG and ZIP without publishing
         run: npm run desktop:dist:mac
