@@ -5,6 +5,12 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+if (process.platform === "darwin") {
+  const { prepareMacVideoEncoder } = await import("./prepare-video-encoder-mac.mjs");
+  await prepareMacVideoEncoder();
+  process.exit(0);
+}
+
 const root = fileURLToPath(new URL("../", import.meta.url));
 const manifest = JSON.parse(await readFile(path.join(root, "desktop/video-encoder.json"), "utf8"));
 const target = path.join(root, "desktop/assets/video-encoder");

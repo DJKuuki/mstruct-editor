@@ -18,7 +18,7 @@ const copy = {
     invalidDocument: "所选文件不是有效的小型 MStruct 文档。", staleOpen: "打开文档凭据已经失效。", invalidSave: "待保存内容不是有效的小型 MStruct 文档。",
     invalidTimelineName: "时间轴文件名无效。", parentRequired: "请先保存或打开关联的 MStruct 文档。",
     sameDirectory: "MStructTime 文件必须与关联的 MStruct 文档位于同一文件夹。", invalidTimeline: "所选文件不是有效的小型 MStructTime 文档。", invalidTimelineSave: "待保存内容不是有效的小型 MStructTime 文档。",
-    storageTitle: "无法读取用户数据", storageMessage: "请确认本机 LocalAppData 用户数据目录可写，并关闭其他运行中的实例后重试。",
+    storageTitle: "无法读取用户数据", storageMessage: "请确认本机用户数据目录可写，并关闭其他运行中的实例后重试。",
     clearUserDataAction: "清除用户数据并重启", clearUserDataTitle: "清除用户数据并重启？", clearUserDataRestart: "清除并重启",
     clearUserDataDetail: "将恢复配色、语言、渲染器偏好、曲库位置、最近文件及外部音频关联等设置，并清除规则缓存。曲库中的谱面、时间轴、音频及同步记录会保留。此操作无法撤销。",
   },
@@ -40,7 +40,7 @@ const copy = {
     invalidDocument: "The selected file is not a valid small MStruct document.", staleOpen: "The open-document token has expired.", invalidSave: "The content is not a valid small MStruct document.",
     invalidTimelineName: "Invalid timeline file name.", parentRequired: "Save or open the associated MStruct document first.",
     sameDirectory: "MStructTime files must be in the same folder as their associated MStruct document.", invalidTimeline: "The selected file is not a valid small MStructTime document.", invalidTimelineSave: "The content is not a valid small MStructTime document.",
-    storageTitle: "User Data Unavailable", storageMessage: "Check that the LocalAppData user data folder is writable, and close other running instances before retrying.",
+    storageTitle: "User Data Unavailable", storageMessage: "Check that the local user data folder is writable, and close other running instances before retrying.",
     clearUserDataAction: "clear user data and restart", clearUserDataTitle: "Clear user data and restart?", clearUserDataRestart: "Clear and restart",
     clearUserDataDetail: "This resets colors, language, renderer preferences, library location, recent files and external audio associations, and clears cached rules. Scores, timelines, audio and sync records in your library are kept. This cannot be undone.",
   },
@@ -65,11 +65,11 @@ async function openCurrentDocumentDirectory({ filePath, shell, dialog, tr }) {
   }
 }
 
-function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotices, showAbout, openTechnicalDocumentation, openCurrentDirectory, recentDocuments = [], clearRecentDocuments, hasDocument = false, hasDocumentPath = false }) {
+function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotices, showAbout, openTechnicalDocumentation, openCurrentDirectory, recentDocuments = [], clearRecentDocuments, hasDocument = false, hasDocumentPath = false, platform = process.platform }) {
   const command = (key, action, accelerator, enabled = true) => ({ id: action, label: tr(key), enabled, ...(accelerator ? { accelerator } : {}), click: () => sendDocumentCommand(action) });
-  // Explicit Windows shortcuts also travel with the themed menu model.
-  const accelerators = { undo: "CmdOrCtrl+Z", redo: "Ctrl+Y", cut: "CmdOrCtrl+X", copy: "CmdOrCtrl+C", paste: "CmdOrCtrl+V", selectAll: "CmdOrCtrl+A",
-    togglefullscreen: "F11", resetZoom: "CmdOrCtrl+0", zoomIn: "CmdOrCtrl+Plus", zoomOut: "CmdOrCtrl+-" };
+  // Native shortcuts also travel with the themed menu model.
+  const accelerators = { undo: "CmdOrCtrl+Z", redo: platform === "darwin" ? "Cmd+Shift+Z" : "Ctrl+Y", cut: "CmdOrCtrl+X", copy: "CmdOrCtrl+C", paste: "CmdOrCtrl+V", selectAll: "CmdOrCtrl+A",
+    togglefullscreen: platform === "darwin" ? "Ctrl+Cmd+F" : "F11", ...(platform === "darwin" ? { quit: "Cmd+Q" } : {}), resetZoom: "CmdOrCtrl+0", zoomIn: "CmdOrCtrl+Plus", zoomOut: "CmdOrCtrl+-" };
   const role = (key, value = key, enabled = true) => ({ id: `role:${value}`, label: tr(key), role: value, enabled, ...(accelerators[value] ? { accelerator: accelerators[value] } : {}) });
   const separator = () => ({ type: "separator" });
   const recent = {

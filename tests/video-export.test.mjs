@@ -123,8 +123,18 @@ test("video IPC rejects foreign senders before opening a native save dialog", as
   assert.equal(dialogs, 0);
 });
 
-const ffmpeg = fileURLToPath(new URL("../desktop/assets/video-encoder/bin/ffmpeg.exe", import.meta.url));
-test("encoded AAC remains below clipping with two overloaded correlated sources", { skip: process.platform !== "win32" || !existsSync(ffmpeg) }, async context => {
+test("native video encoding selects macOS VideoToolbox and preserves Windows Media Foundation options", () => {
+  const options = { frameCount: 60, fps: 60, output: "test.mp4" };
+  const windows = encoding.videoEncodingArguments({ ...options, platform: "win32" });
+  const mac = encoding.videoEncodingArguments({ ...options, platform: "darwin" });
+  assert.deepEqual(windows.slice(windows.indexOf("-c:v"), windows.indexOf("-pix_fmt")), ["-c:v", "h264_mf", "-hw_encoding", "0"]);
+  assert.deepEqual(mac.slice(mac.indexOf("-c:v"), mac.indexOf("-pix_fmt")), ["-c:v", "h264_videotoolbox", "-allow_sw", "1"]);
+  assert.deepEqual(windows.slice(windows.indexOf("-pix_fmt")), mac.slice(mac.indexOf("-pix_fmt")));
+  assert.throws(() => encoding.videoEncodingArguments({ ...options, platform: "unsupported" }), /Unsupported/);
+});
+
+const ffmpeg = fileURLToPath(new URL(`../desktop/assets/video-encoder/bin/${process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg"}`, import.meta.url));
+test("encoded AAC remains below clipping with two overloaded correlated sources", { skip: !existsSync(ffmpeg) }, async context => {
   const directory = await mkdtemp(path.join(tmpdir(), "mstruct-video-mix-"));
   const pcm = Buffer.alloc(48000 * 2 * 4);
   for (let sample = 0; sample < 48000; sample++) {

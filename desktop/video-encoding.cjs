@@ -1,7 +1,8 @@
 const WIDTH = 1920, HEIGHT = 1080, FPS = 30, SAMPLE_RATE = 48000;
 
-function videoEncodingArguments({ frameCount, fps = FPS, bgmPath, pianoPath, bgmVolume = 100, output }) {
+function videoEncodingArguments({ frameCount, fps = FPS, bgmPath, pianoPath, bgmVolume = 100, output, platform = process.platform }) {
   if (fps !== 30 && fps !== 60) throw new Error("Invalid video frame rate.");
+  if (platform !== "win32" && platform !== "darwin") throw new Error("Unsupported video encoding platform.");
   const duration = frameCount / fps;
   const args = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-f", "rawvideo", "-pixel_format", "bgra", "-video_size", `${WIDTH}x${HEIGHT}`, "-framerate", String(fps), "-i", "pipe:0"];
   const tracks = [];
@@ -17,7 +18,8 @@ function videoEncodingArguments({ frameCount, fps = FPS, bgmPath, pianoPath, bgm
     filters.push(`${mix}alimiter=limit=0.794328:level=0:latency=1,apad,atrim=duration=${duration}[audio]`);
     args.push("-filter_complex", filters.join(";"), "-map", "[audio]", "-c:a", "aac", "-b:a", "192k");
   } else args.push("-an");
-  args.push("-c:v", "h264_mf", "-hw_encoding", "0", "-pix_fmt", "nv12", "-b:v", "10000000", "-g", String(fps * 2), "-t", String(duration), "-movflags", "+faststart", output);
+  args.push(...(platform === "darwin" ? ["-c:v", "h264_videotoolbox", "-allow_sw", "1"] : ["-c:v", "h264_mf", "-hw_encoding", "0"]));
+  args.push("-pix_fmt", "nv12", "-b:v", "10000000", "-g", String(fps * 2), "-t", String(duration), "-movflags", "+faststart", output);
   return args;
 }
 

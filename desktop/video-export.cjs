@@ -60,7 +60,7 @@ function setupVideoExport({ ipcMain, BrowserWindow, dialog, app, getWindow, asse
       const target = /\.mp4$/i.test(result.filePath) ? result.filePath : `${result.filePath}.mp4`;
       job.directory = await mkdtemp(path.join(path.dirname(target), ".mstruct-video-"));
       const output = path.join(job.directory, "video.mp4");
-      const executable = path.join(assetsRoot(), "video-encoder", "bin", "ffmpeg.exe");
+      const executable = path.join(assetsRoot(), "video-encoder", "bin", process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg");
       let bgmPath, pianoPath;
       if (snapshot.bgm) {
         bgmPath = path.join(job.directory, `music${path.extname(snapshot.bgm.name).toLowerCase()}`);

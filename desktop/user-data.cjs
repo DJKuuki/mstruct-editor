@@ -16,9 +16,12 @@ function requestUserDataReset(directory) {
   writeFileSync(path.join(directory, RESET), "{}", "utf8");
 }
 
-/** LocalAppData already belongs to one OS account and remains stable across app versions. */
-function configureUserData(app, { isolatedDirectory, localAppData = process.env.LOCALAPPDATA, claimDirectory = () => true } = {}) {
-  const directory = path.resolve(isolatedDirectory || path.join(localAppData || path.resolve(app.getPath("appData"), "..", "Local"), "MStruct", "Analysis Editor"));
+/** Use the OS account's stable application-data folder across app versions. */
+function configureUserData(app, { isolatedDirectory, platform = process.platform, localAppData = process.env.LOCALAPPDATA, claimDirectory = () => true } = {}) {
+  const base = () => platform === "win32"
+    ? localAppData || path.resolve(app.getPath("appData"), "..", "Local")
+    : app.getPath("appData");
+  const directory = path.resolve(isolatedDirectory || path.join(base(), "MStruct", "Analysis Editor"));
   const sessionDirectory = path.join(directory, "chromium");
   for (const [name, target] of Object.entries({ userData: directory, sessionData: sessionDirectory, logs: path.join(directory, "logs"), crashDumps: path.join(directory, "crashes") })) {
     mkdirSync(target, { recursive: true });

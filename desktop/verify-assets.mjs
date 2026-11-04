@@ -29,10 +29,15 @@ for (const [index, size] of ICON_SIZES.entries()) {
   assert.deepEqual([...icon.subarray(offset, offset + 8)], [137, 80, 78, 71, 13, 10, 26, 10], "ICO payload is not PNG-compressed.");
   assert.equal(icon.readUInt32BE(offset + 16), size); assert.equal(icon.readUInt32BE(offset + 20), size);
 }
-const videoEncoder = JSON.parse(await readFile(new URL("./video-encoder.json", import.meta.url), "utf8"));
-for (const [name, expected] of Object.entries(videoEncoder.files)) {
-  assert.equal(await sha256(new URL(`./assets/video-encoder/bin/${name}`, import.meta.url)), expected, `Video encoder checksum changed: ${name}`);
+if (process.platform === "darwin") {
+  const { verifyMacVideoEncoder } = await import("../scripts/prepare-video-encoder-mac.mjs");
+  await verifyMacVideoEncoder();
+} else {
+  const videoEncoder = JSON.parse(await readFile(new URL("./video-encoder.json", import.meta.url), "utf8"));
+  for (const [name, expected] of Object.entries(videoEncoder.files)) {
+    assert.equal(await sha256(new URL(`./assets/video-encoder/bin/${name}`, import.meta.url)), expected, `Video encoder checksum changed: ${name}`);
+  }
+  assert.match(await readFile(new URL("./assets/video-encoder/LICENSE-LGPLv3.txt", import.meta.url), "utf8"), /LESSER GENERAL PUBLIC LICENSE/);
+  assert.match(await readFile(new URL("./assets/video-encoder/LICENSE-GPLv3.txt", import.meta.url), "utf8"), /GNU GENERAL PUBLIC LICENSE/);
 }
-assert.match(await readFile(new URL("./assets/video-encoder/LICENSE-LGPLv3.txt", import.meta.url), "utf8"), /LESSER GENERAL PUBLIC LICENSE/);
-assert.match(await readFile(new URL("./assets/video-encoder/LICENSE-GPLv3.txt", import.meta.url), "utf8"), /GNU GENERAL PUBLIC LICENSE/);
 console.log("Desktop assets verified.");

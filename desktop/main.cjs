@@ -123,6 +123,9 @@ function desktopAssetsRoot() {
 }
 
 function desktopIconPath() {
+  if (process.platform === "darwin") return app.isPackaged
+    ? path.join(process.resourcesPath, "desktop-icon.png")
+    : path.resolve(__dirname, "generated", "icon.png");
   return app.isPackaged
     ? path.join(process.resourcesPath, "desktop-icon.ico")
     : path.resolve(__dirname, "generated", "icon.ico");

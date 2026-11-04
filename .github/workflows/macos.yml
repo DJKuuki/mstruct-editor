@@ -1,0 +1,57 @@
+name: macOS standalone
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: macOS ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      EXPECTED_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Check native architecture
+        run: node -e 'if (process.platform !== "darwin" || process.arch !== process.env.EXPECTED_ARCH) process.exit(1)'
+      - run: npm ci
+      - name: Prepare offline assets and native FFmpeg
+        run: npm run desktop:prepare
+      - run: npm test
+      - name: Build DMG and ZIP without publishing
+        run: npm run desktop:dist:mac
+      - name: Verify packaged app, signature and MP4 encoding
+        run: node scripts/verify-mac-package.mjs
+      - name: Upload verified packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: MStruct-mac-${{ matrix.arch }}-${{ github.sha }}
+          path: |
+            release/MStruct-Analysis-Editor-*-mac-${{ matrix.arch }}.dmg
+            release/MStruct-Analysis-Editor-*-mac-${{ matrix.arch }}.zip
+            release/MStruct-Analysis-Editor-*-mac-${{ matrix.arch }}.sha256
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

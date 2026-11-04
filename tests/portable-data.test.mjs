@@ -21,17 +21,17 @@ test("fixed LocalAppData storage retains preferences and library location across
   const root = mkdtempSync(path.join(scratch, "user-data-"));
   try {
     const localAppData = path.join(root, "account", "Local"), first = instance();
-    const directory = configureUserData(first, { localAppData });
+    const directory = configureUserData(first, { localAppData, platform: "win32" });
     assert.equal(directory, path.join(localAppData, "MStruct", "Analysis Editor"));
     for (const key of ["userData", "sessionData", "logs", "crashDumps"]) assert.ok(first.paths[key].startsWith(directory));
     mkdirSync(path.join(directory, "chromium", "Local Storage"), { recursive: true });
     writeFileSync(path.join(directory, "chromium", "Local Storage", "settings"), "saved preferences");
     for (const file of ["library.json", "audio-associations.json", "recent-documents.json"]) writeFileSync(path.join(directory, file), "saved state");
     const upgraded = instance();
-    assert.equal(configureUserData(upgraded, { localAppData }), directory);
+    assert.equal(configureUserData(upgraded, { localAppData, platform: "win32" }), directory);
     assert.equal(readFileSync(path.join(directory, "chromium", "Local Storage", "settings"), "utf8"), "saved preferences");
     for (const file of ["library.json", "audio-associations.json", "recent-documents.json"]) assert.equal(readFileSync(path.join(directory, file), "utf8"), "saved state");
-    const other = configureUserData(instance(), { localAppData: path.join(root, "other-account", "Local") });
+    const other = configureUserData(instance(), { localAppData: path.join(root, "other-account", "Local"), platform: "win32" });
     assert.notEqual(other, directory); assert.ok(!existsSync(path.join(other, "library.json")));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
@@ -43,6 +43,22 @@ test("isolated smoke data initializes only its explicitly supplied directory", (
     assert.equal(configureUserData(instance(), { isolatedDirectory: isolated }), isolated);
     assert.ok(existsSync(path.join(isolated, "user-data.json")));
     assert.ok(!existsSync(path.join(isolated, "mstruct-profiles")));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("macOS stores data under Application Support and ignores Windows environment paths", () => {
+  const root = mkdtempSync(path.join(scratch, "mac-user-data-"));
+  try {
+    const applicationSupport = path.join(root, "Library", "Application Support");
+    const app = instance();
+    app.getPath = key => { assert.equal(key, "appData"); return applicationSupport; };
+    const options = { platform: "darwin", localAppData: path.join(root, "wrong-windows-path") };
+    const directory = configureUserData(app, options);
+    assert.equal(directory, path.join(applicationSupport, "MStruct", "Analysis Editor"));
+    writeFileSync(path.join(directory, "library.json"), "preserve");
+    assert.equal(configureUserData(app, options), directory);
+    assert.equal(readFileSync(path.join(directory, "library.json"), "utf8"), "preserve");
+    assert.ok(!existsSync(options.localAppData));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

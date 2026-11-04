@@ -1,5 +1,5 @@
 /** Native accelerators and trusted actions share one template with the themed menu bar. */
-function createApplicationMenu({ Menu, ipcMain, assertTrustedSender, getWindow, createTemplate, quit }) {
+function createApplicationMenu({ Menu, ipcMain, assertTrustedSender, getWindow, createTemplate, quit, platform = process.platform }) {
   let model = [], actions = new Map(), fingerprint = "", revision = 0;
   const snapshot = () => ({ revision, menus: model });
   function refresh() {
@@ -16,7 +16,12 @@ function createApplicationMenu({ Menu, ipcMain, assertTrustedSender, getWindow, 
     const next = serialize(template), signature = JSON.stringify(next);
     if (signature === fingerprint) return;
     fingerprint = signature; model = next; actions = nextActions; revision++;
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+    // macOS reserves the first native menu for the application. Keep File intact.
+    const nativeTemplate = platform === "darwin" ? [{ label: "MStruct", submenu: [
+      { role: "services" }, { type: "separator" }, { role: "hide" }, { role: "hideOthers" },
+      { role: "unhide" }, { type: "separator" }, { role: "quit" },
+    ] }, ...template] : template;
+    Menu.setApplicationMenu(Menu.buildFromTemplate(nativeTemplate));
     const window = getWindow();
     if (window && !window.isDestroyed()) {
       window.setMenuBarVisibility(false);

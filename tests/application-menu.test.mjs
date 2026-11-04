@@ -46,10 +46,27 @@ test("themed and native templates expose editing and view shortcuts, including w
   const f = fixture(); f.controller.refresh();
   const shortcuts = () => new Map(f.controller.snapshot().menus.flatMap(menu => menu.submenu).map(item => [item.id, item.accelerator]));
   const expected = { "role:undo": "CmdOrCtrl+Z", "role:redo": "Ctrl+Y", "role:cut": "CmdOrCtrl+X", "role:copy": "CmdOrCtrl+C", "role:paste": "CmdOrCtrl+V", "role:selectAll": "CmdOrCtrl+A",
-    "role:togglefullscreen": "F11", "role:resetZoom": "CmdOrCtrl+0", "role:zoomIn": "CmdOrCtrl+Plus", "role:zoomOut": "CmdOrCtrl+-" };
+    "role:togglefullscreen": process.platform === "darwin" ? "Ctrl+Cmd+F" : "F11", "role:resetZoom": "CmdOrCtrl+0", "role:zoomIn": "CmdOrCtrl+Plus", "role:zoomOut": "CmdOrCtrl+-" };
+  if (process.platform === "darwin") expected["role:redo"] = "Cmd+Shift+Z";
   for (const [id, shortcut] of Object.entries(expected)) assert.equal(shortcuts().get(id), shortcut, id);
   f.active(true); f.locale.set("en"); f.controller.refresh();
   for (const [id, shortcut] of Object.entries(expected)) assert.equal(shortcuts().get(id), shortcut, id);
+});
+test("macOS reserves a native application menu and keeps File and platform accelerators accessible", () => {
+  const locale = applicationUi.createDesktopLocale("en");
+  let installed;
+  const template = applicationUi.applicationMenuTemplate({ tr: locale.tr, platform: "darwin" });
+  const controller = applicationMenuModule.createApplicationMenu({ platform: "darwin",
+    Menu: { buildFromTemplate: value => value, setApplicationMenu: value => { installed = value; } },
+    ipcMain: { handle() {} }, getWindow: () => null, createTemplate: () => template });
+  controller.refresh();
+  assert.equal(installed[0].label, "MStruct");
+  assert.equal(installed[1].id, "file");
+  assert.equal(controller.snapshot().menus[0].id, "file");
+  const shortcuts = new Map(template.flatMap(menu => menu.submenu).map(item => [item.id, item.accelerator]));
+  assert.equal(shortcuts.get("role:redo"), "Cmd+Shift+Z");
+  assert.equal(shortcuts.get("role:togglefullscreen"), "Ctrl+Cmd+F");
+  assert.equal(shortcuts.get("role:quit"), "Cmd+Q");
 });
 test("menu IPC accepts only trusted senders and known enabled actions; native editing and view roles remain bounded", () => {
   const f = fixture(); f.controller.refresh();
