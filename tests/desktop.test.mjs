@@ -8,6 +8,8 @@ import { prepareDesktopProfile } from "../scripts/prepare-desktop-profile.mjs";
 import { PROFILE_FILES } from "../src/core/profile-schema.js";
 import { verifyMstructProfile } from "../src/core/profile.js";
 import { resolveMstructDocument } from "../src/core/profile-document.js";
+import { parseMstructDocument } from "../src/core/mstruct-document.js";
+import { loadDesktopTimelineFiles } from "../src/runtime/timeline-io.js";
 import { nextDesktopVersion, desktopBuildVersion } from "../desktop/version.mjs";
 import applicationUi from "../desktop/application-ui.cjs";
 const { createDesktopLocale, applicationMenuTemplate } = applicationUi;
@@ -29,6 +31,22 @@ const [packageJson, mainSource, preloadSource, audioSource, symbolSource, editor
 ]);
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+
+test("bundled startup demo needs no external timeline and genuine missing-file warnings remain active", async () => {
+  const demo = parseMstructDocument(await readFile(new URL("../examples/k545.mstruct", import.meta.url), "utf8"));
+  assert.equal(demo.ok, true);
+  assert.deepEqual(demo.metadata.mstructtimeFiles, [], "The unsaved startup demo cannot resolve external timeline files.");
+  const warnings = [], loaded = [];
+  const options = {
+    desktopApi: { loadTimelines: async names => ({ files: names.map(fileName => ({ fileName, missing: true })) }) },
+    onFiles: files => loaded.push(files), onMissing: names => warnings.push(names),
+  };
+  await loadDesktopTimelineFiles({ ...options, fileNames: demo.metadata.mstructtimeFiles });
+  assert.deepEqual(loaded, [[]]);
+  assert.deepEqual(warnings, []);
+  await loadDesktopTimelineFiles({ ...options, fileNames: ["recording.mstructtime"] });
+  assert.deepEqual(warnings, [["recording.mstructtime"]]);
+});
 
 test("desktop packaging embeds current complete rules and updates the example for offline resolution", async () => {
   const directory = await mkdtemp(path.join(tmpdir(), "mstruct-desktop-profile-"));
