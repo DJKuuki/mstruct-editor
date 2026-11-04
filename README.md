@@ -61,6 +61,10 @@ The build script defaults to npmmirror for Electron and electron-builder binary 
 
 Manually run **macOS standalone** in this editor repository's GitHub Actions. Native Apple Silicon and Intel runners produce architecture-labelled DMG, ZIP and SHA-256 files. The version comes from `package.json`; the workflow neither increments it nor publishes a Release. macOS 13 or later is required. Private-repository runs use the account's Actions allowance.
 
+FFmpeg 按 macOS 构建环境、CPU 架构及编译脚本指纹缓存；指纹覆盖固定源码提交和编译参数。缓存命中后仍校验来源、架构、参数和全部文件摘要，通过后直接复用。首次构建、脚本／源码变化、缓存缺失或校验失败时才编译；验证完成即保存编码器缓存，不依赖后续应用测试是否通过。
+
+FFmpeg is cached by macOS build environment, CPU architecture and build-script fingerprint, which includes the pinned source revision and compiler options. Cache hits are reused only after checking provenance, architecture, configuration and all file hashes. Compilation is needed only on the first build, changed scripts/source, a missing cache or failed validation. The verified encoder cache is saved before subsequent application tests.
+
 每个架构都运行完整测试，解压实际分发 ZIP 检查签名与应用启动，并用随包编码器生成、解码 30／60 fps H.264＋AAC 样片；全部通过后才上传构建附件，保留 14 天。首次云端成功前，此流程属于待验证构建支持。拿到包后还需在真实 Mac 上验收编辑、保存、播放和视频导出。
 
 Each architecture runs the full suite, extracts the distribution ZIP to verify signatures and application startup, and encodes/decodes 30/60 fps H.264 + AAC samples with the bundled encoder. Artifacts are uploaded only after these checks pass and retained for 14 days. Until the first successful cloud run, this is unverified build support. Editing, saving, playback and video export still require hands-on acceptance on a Mac.

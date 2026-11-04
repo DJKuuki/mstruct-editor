@@ -37,8 +37,20 @@ jobs:
       - name: Check native architecture
         run: node -e 'if (process.platform !== "darwin" || process.arch !== process.env.EXPECTED_ARCH) process.exit(1)'
       - run: npm ci
+      - name: Restore video encoder cache
+        id: encoder-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: desktop/assets/video-encoder
+          key: ffmpeg-macos-15-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
       - name: Prepare offline assets and native FFmpeg
         run: npm run desktop:prepare
+      - name: Cache verified video encoder
+        if: steps.encoder-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: desktop/assets/video-encoder
+          key: ffmpeg-macos-15-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-video-encoder-mac.mjs') }}
       - run: npm test
       - name: Build DMG and ZIP without publishing
         run: npm run desktop:dist:mac
