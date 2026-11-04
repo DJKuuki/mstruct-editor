@@ -16,15 +16,17 @@ function fixture() {
   });
   return { controller, commands, roles, changes, handlers, locale, active(value, saved = false) { active = value; hasPath = saved; controller.refresh(); }, counts: () => ({ builds, installed, quit }) };
 }
-test("empty library disables document/edit actions, while opening a document enables them and editor settings", () => {
+test("library settings remain available while document actions follow the open document", () => {
   const f = fixture(); f.controller.refresh();
   const menus = f.controller.snapshot().menus, file = menus.find(menu => menu.id === "file"), edit = menus.find(menu => menu.id === "edit");
   for (const id of ["new", "save", "save-as", "export"]) assert.equal(file.submenu.find(item => item.id === id).enabled, false, id);
   assert.ok(edit.submenu.filter(item => item.type !== "separator").every(item => !item.enabled));
   assert.equal(file.submenu.find(item => item.id === "open").enabled, true);
   const settings = menus.find(menu => menu.id === "settings");
-  assert.deepEqual(settings.submenu.map(item => [item.id, item.enabled]), [["application-settings", true], ["editor-settings", false]]);
-  for (const id of ["new", "save", "save-as", "export:pdf", "role:copy", "editor-settings"]) assert.equal(f.controller.invoke(id), false);
+  assert.deepEqual(settings.submenu.map(item => [item.id, item.enabled]), [["application-settings", true], ["editor-settings", true]]);
+  for (const id of ["new", "save", "save-as", "export:pdf", "role:copy"]) assert.equal(f.controller.invoke(id), false);
+  assert.equal(f.controller.invoke("editor-settings"), true);
+  assert.deepEqual(f.commands.splice(0), ["editor-settings"]);
   f.active(true);
   for (const id of ["new", "save", "save-as", "export:pdf", "editor-settings"]) assert.equal(f.controller.invoke(id), true);
   assert.deepEqual(f.commands, ["new", "save", "save-as", "export:pdf", "editor-settings"]);

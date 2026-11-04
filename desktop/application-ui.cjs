@@ -88,7 +88,7 @@ function applicationMenuTemplate({ tr, sendDocumentCommand, showThirdPartyNotice
       ...(hasDocument ? [{ id: "open-current-directory", label: tr("openCurrentDirectory"), enabled: hasDocumentPath, click: openCurrentDirectory }, separator(), command("returnLibrary", "return-library"), separator()] : []), role("quit")] },
     { id: "edit", label: tr("edit"), submenu: [role("undo", "undo", hasDocument), role("redo", "redo", hasDocument), separator(), role("cut", "cut", hasDocument), role("copy", "copy", hasDocument), role("paste", "paste", hasDocument), role("selectAll", "selectAll", hasDocument)] },
     { id: "view", label: tr("view"), submenu: [role("fullscreen", "togglefullscreen"), separator(), role("resetZoom"), role("zoomIn"), role("zoomOut")] },
-    { id: "settings", label: tr("settings"), submenu: [command("applicationSettings", "application-settings"), command("editorSettings", "editor-settings", undefined, hasDocument)] },
+    { id: "settings", label: tr("settings"), submenu: [command("applicationSettings", "application-settings"), command("editorSettings", "editor-settings")] },
     { id: "help", label: tr("help"), submenu: [{ id: "help:documentation", label: tr("technicalDocumentation"), click: openTechnicalDocumentation }, separator(), { id: "help:licenses", label: tr("licenses"), click: showThirdPartyNotices }, separator(), { id: "help:about", label: tr("about"), click: showAbout }] },
   ];
 }

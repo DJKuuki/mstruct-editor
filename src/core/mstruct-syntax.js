@@ -212,7 +212,7 @@ export function parseSetting(token, source, errors) {
 
 export function parseControlMarker(token, source, errors) {
   const content = token.content.trim();
-  const simple = { "||:": "repeat-start", "||": "double-bar" }[content];
+  const simple = { "||:": "repeat-start", "||": "double-bar", "||END": "final-bar" }[content];
   if (simple) return { kind: simple, start: token.start, end: token.end };
   if (content === ":||") {
     return {
@@ -275,6 +275,20 @@ export function applyControlMarker({ marker, measure, slot, state, source, error
   if (marker.kind === "invalid-control") return;
   const atMeasureStart = measure.slots.length === 0 && measure.duration.numerator === 0;
   const hasEvent = slot.events.length > 0;
+  if (marker.kind === "final-bar") {
+    if (!source.slice(marker.end).trimStart().startsWith(";")
+      || (!hasEvent && !measure.slots.at(-1)?.events.length)) {
+      makeError(errors, source, "final-bar-position", marker.start, marker.end);
+      return;
+    }
+    if (slot.markersAfter.some((item) => ["double-bar", "repeat-start", "repeat-end"].includes(item.kind))) {
+      makeError(errors, source, "final-bar-conflict", marker.start, marker.end);
+      return;
+    }
+    measure.finalBar = marker;
+    slot.closedByControl = true;
+    return;
+  }
   const before = marker.kind === "repeat-start" || marker.kind === "ending-start"
     || (marker.kind === "repeat-end" && !hasEvent)
     || (marker.kind === "double-bar" && !hasEvent);

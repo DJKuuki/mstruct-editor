@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("mstructDesktop", Object.freeze({
   libraryLeave: () => ipcRenderer.invoke("mstruct-library:leave"),
   libraryScan: () => ipcRenderer.invoke("mstruct-library:scan"),
   libraryRules: () => ipcRenderer.invoke("mstruct-library:rules"),
+  libraryMigrate: (value) => ipcRenderer.invoke("mstruct-library:migrate", value),
   libraryExtracted: () => ipcRenderer.invoke("mstruct-library:extracted"),
   libraryAdopt: (token) => ipcRenderer.invoke("mstruct-library:adopt", token),
   libraryCache: (value) => ipcRenderer.invoke("mstruct-library:cache", value),

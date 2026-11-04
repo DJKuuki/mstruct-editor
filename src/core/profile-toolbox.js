@@ -63,7 +63,7 @@ export function toolboxTemplateWitness(insertion, config) {
     return `${PREFIX}{ENDING:1}${CHORD}{/ENDING:1}{:||};{ENDING:2}${CHORD}{/ENDING};`;
   }
   if (insertion === "{||:}") return `${PREFIX}${text}${CHORD}{:||};`;
-  if (insertion === "{:||}" || insertion === "{||}") return `${PREFIX}${CHORD}${text};`;
+  if (["{:||}", "{||}", "{||END}"].includes(insertion)) return `${PREFIX}${CHORD}${text};`;
   if (insertion === "..." || insertion === "{LB}") return `${PREFIX}${CHORD};${text}`;
   if (insertion === "{BN:}") return `${PREFIX}${CHORD};{BN:2}${CHORD};`;
   if (["X", "0", "-", "N.C.", "Clus", "ClusWK", "ClusBK"].includes(insertion)) {

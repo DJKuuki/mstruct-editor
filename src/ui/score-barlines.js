@@ -18,9 +18,11 @@ export function alignScoreBarlines(chart) {
     const double = boundary.classList.contains('is-double-bar');
     const width = rect.width || fontSize * .125;
     for (const [side, offset] of double ? [['before', -.22], ['after', .22]] : [['before', 0]]) {
-      const snapped = snapScoreBarline(rect.left + offset * fontSize, width, ratio);
+      const lineWidth = side === 'after' && boundary.classList.contains('is-final-bar') ? width * 3 : width;
+      const snapped = snapScoreBarline(rect.left + offset * fontSize, lineWidth, ratio);
       boundary.style.setProperty(`--barline-${side}-left`, `${snapped.left - rect.left}px`);
-      boundary.style.setProperty('--barline-pixel-width', `${snapped.width}px`);
+      if (side === 'before') boundary.style.setProperty('--barline-pixel-width', `${snapped.width}px`);
+      else boundary.style.setProperty('--barline-after-pixel-width', `${snapped.width}px`);
     }
     boundary.classList.add('is-pixel-aligned');
   }

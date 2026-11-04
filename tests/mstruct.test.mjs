@@ -268,6 +268,47 @@ test("BN 可跳号但不可倒退，省略号后仍需单调递增", () => {
   assert.ok(backward.errors.some((error) => error.code === "bar-number-backward"));
 });
 
+test("终止小节线支持音乐与空槽延长，并保留实际路线和时值", () => {
+  for (const body of ["C|,D|,E|,F|", "C|,,,", "0,,,", "C|,-,,"]) {
+    const source = `{BN:1}{TS:4/4}{D:1/4}${body}`;
+    const ordinary = parseMstruct(`${source};`);
+    const result = parseMstruct(`${source}{||END} \n; \n`);
+    assert.equal(result.ok, true, JSON.stringify(result.errors));
+    assert.equal(result.measures[0].finalBar.kind, "final-bar");
+    assert.deepEqual(result.measures[0].duration, ordinary.measures[0].duration);
+    assert.deepEqual(result.playbackRoute.map(({ slot }) => slot.duration), ordinary.playbackRoute.map(({ slot }) => slot.duration));
+    assert.deepEqual(createMstructtimeLoopInstructions(result), createMstructtimeLoopInstructions(ordinary));
+  }
+  const endings = "{BN:1}{TS:4/4}{D:1}{||:}C|;{ENDING:1}G|{/ENDING:1}{:||};{ENDING:2}C|{/ENDING}";
+  const result = parseMstruct(`${endings}{||END};`);
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.deepEqual(result.playbackRoute.map(({ slot }) => slot.events[0].chord), ["C", "G", "C", "C"]);
+});
+
+test("终止小节线严格限定结束位置、后续内容和小节拍数", () => {
+  const prefix = "{BN:1}{TS:4/4}{D:1}";
+  const cases = [
+    ["{||END};", "final-bar-position"],
+    ["C|{||END}", "final-bar-position"],
+    ["C|{||END},C|;", "final-bar-position"],
+    ["C|{||END}{LB};", "final-bar-position"],
+    ["C|{:||}{||END};", "final-bar-conflict"],
+    ["C|{||END};D|;", "final-bar-content"],
+    ["C|{||END};...", "final-bar-content"],
+    ["C|{||END};{LB}", "final-bar-content"],
+    ["C|{||END};{BN:20}D|;", "final-bar-content"],
+    ["{D:1/4}C|{||END};", "repeat-meter-mismatch"],
+  ];
+  for (const [body, code] of cases) {
+    const result = parseMstruct(prefix + body);
+    assert.equal(result.ok, false, body);
+    assert.ok(result.errors.some(error => error.code === code), `${body}: ${JSON.stringify(result.errors)}`);
+  }
+  for (const body of ["C|{||}{||END};", "C|{||:}{||END};", "C|{||END}{||END};"]) {
+    assert.equal(parseMstruct(prefix + body).ok, false, body);
+  }
+});
+
 test("TS:adlib 暂停小节时值校验，恢复数字 TS 时重新校验并保存可见标记", () => {
   const valid = parseMstruct("{BN:1}{TS:adlib}{D:1/4}C|;C|,C|,C|;{TS:3/4}C|,C|,C|;");
   assert.equal(valid.ok, true, valid.errors.map((error) => error.message).join("\n"));

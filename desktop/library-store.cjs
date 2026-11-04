@@ -2,6 +2,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { INTERNAL, digest, validName, safePath, readOptional, assertVacant } = require("./library-paths.cjs");
 const { atomicWrite, transact, recover } = require("./library-transaction.cjs");
+const { migrationWrites } = require("./library-migration.cjs");
 
 const STATE = `${INTERNAL}/state.json`, CACHE = `${INTERNAL}/index.json`;
 const emptyState = () => ({ version: 1, sources: {}, audio: {}, snapshot: null });
@@ -245,7 +246,21 @@ function createLibraryStore(root) {
     for (const directory of [...directories, "rules"]) await fs.rmdir(await safePath(root, directory)).catch(() => {});
     return true;
   }
-  return { root, scan, load, rules, writeCache, relativeOf, sourceFor, renameFile, renameFolder, createFolder, createAnalysis, remove, planImport, applyImport, adoptExtracted,
+  async function migrate(payload) {
+    await load();
+    const { writes, backup } = await migrationWrites(root, payload);
+    const stateBytes = await readOptional(path.join(root, STATE));
+    writes.push({ path: `${backup}/state.json`, data: stateBytes ?? JSON.stringify(state), expected: null });
+    for (const change of payload.changes) {
+      const source = sourceFor(change.path);
+      if (source) source.lastLocalHash = digest(change.text);
+    }
+    writes.push({ path: STATE, data: stateAfterWrites, expected: stateBytes ? digest(stateBytes) : null });
+    writes.push({ path: CACHE, data: null });
+    await transact(root, writes);
+    return { written: payload.changes.length, backup: path.join(root, backup) };
+  }
+  return { root, scan, load, rules, writeCache, relativeOf, sourceFor, renameFile, renameFolder, createFolder, createAnalysis, remove, planImport, applyImport, adoptExtracted, migrate,
     async audioState() { await load(); return state.audio; },
     async rememberAudio(key, value) { await load(); state.audio[key] = value; await saveState(); },
   };

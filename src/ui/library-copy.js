@@ -1,5 +1,12 @@
 const copy = {
   zh: {
+    migrate: "批量迁移规则", migrationTarget: "目标规则", migrationReview: "查看迁移计划", migrationApply: "迁移全部可用文件",
+    migrationScope: "扫描当前曲库及其子文件夹中的全部 .mstruct 文件。可用规则可在编辑器设置中更新或导入。",
+    migrationChecking: "正在校验目标规则下的分析…", migrationWriting: "正在保存原文件并迁移…",
+    migrationSummary: "{ready} 份可迁移，{current} 份已使用目标规则，{errors} 份校验失败。",
+    migrationBackup: "确认后将迁移通过校验的文件，并在曲库的 .mstruct-library/migrations 文件夹保存原文件副本。",
+    migrationDone: "已迁移 {count} 份分析并重建索引。原文件副本保存在 {backup}",
+    migrationStatus_ready: "待迁移", migrationStatus_current: "已使用目标规则", migrationStatus_error: "跳过，需先处理错误",
     diffHelp: "红色底纹标出差异行，深色标出变化的字符；两栏行号分别对应各自文件。", diffLabel: "本地与 MStruct档案库差异", diffLine: "第 {line} 行", diffAdded: "仅 MStruct档案库有此行", diffRemoved: "仅本地有此行", diffChanged: "此行有差异",
     open: "打开", returnLibrary: "返回本地曲库", readyAll: "共 {total} 份分析，全部可搜索",
     library: "本地曲库", choose: "选择／切换曲库", empty: "选择或建立一个文件夹作为曲库。", import: "导入 MStruct档案库 ZIP", scan: "重新扫描", rebuild: "重建索引", folder: "新建文件夹", analysis: "新建分析",
@@ -9,6 +16,13 @@ const copy = {
     "library-name": "名称不能为空，且必须是可移植文件名。", "library-exists": "目标名称已存在，不会覆盖。", "library-case-rename": "仅大小写不同的改名请先使用一个中间名称。", "library-stale": "文件或曲库已变化，请重新扫描并生成计划。", "library-format": "仅支持 MStruct档案库 ZIP v2。", "library-checksum": "ZIP 或清单校验失败。", "library-zip": "ZIP 格式或路径不安全。", "library-catalog": "来源目录无效。", "library-unlisted": "包中存在未列入清单的文件。", "library-parse": "谱面解析失败。", "library-rules": "规则包缺失或谱面与规则不匹配。", "library-timeline": "时间轴或关联不一致。", "library-name-mismatch": "包内分析名与文件名不一致。", "library-size": "文件或曲库超过当前处理上限。", "profile-missing": "缺少精确规则包。", "profile-assignment-required": "文件尚未绑定规则。", "library-symlink": "曲库内不支持符号链接。", "library-path": "文件路径不安全。", "library-decision": "请处理全部冲突。", "library-select": "请先选择曲库。",
   },
   en: {
+    migrate: "Migrate library rules", migrationTarget: "Target rules", migrationReview: "Review migration", migrationApply: "Migrate all valid files",
+    migrationScope: "Scan every .mstruct file in this library and its subfolders. Update or import available rules in Editor Settings.",
+    migrationChecking: "Validating analyses with the target rules…", migrationWriting: "Saving originals and migrating…",
+    migrationSummary: "{ready} files can migrate, {current} already use the target rules, and {errors} failed validation.",
+    migrationBackup: "Confirmation migrates the files that passed validation and saves their originals in the library's .mstruct-library/migrations folder.",
+    migrationDone: "Migrated {count} analyses and rebuilt the index. Originals are saved in {backup}",
+    migrationStatus_ready: "Ready to migrate", migrationStatus_current: "Already current", migrationStatus_error: "Skipped, resolve errors first",
     diffHelp: "Red shading marks changed lines; darker shading marks changed characters. Line numbers refer to each file.", diffLabel: "Local and Archive differences", diffLine: "Line {line}", diffAdded: "Archive-only line", diffRemoved: "Local-only line", diffChanged: "Changed line",
     open: "Open", returnLibrary: "Back to local library", readyAll: "All {total} analyses are searchable",
     library: "Local Library", choose: "Choose / switch library", empty: "Choose or create a folder for your library.", import: "Import Archive ZIP", scan: "Rescan", rebuild: "Rebuild index", folder: "New folder", analysis: "New analysis",

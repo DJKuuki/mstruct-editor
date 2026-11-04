@@ -632,11 +632,13 @@ body.mstruct-viewer.renderer-fullscreen-external .renderer-canvas { min-block-si
 }
 .measure-barline.is-double-bar::before, .control-boundary.is-double-bar::before { inset-inline-start: -.22em; }
 .measure-barline.is-double-bar::after, .control-boundary.is-double-bar::after { inset-inline-start: .22em; }
+.measure-barline.is-final-bar::after { inline-size: calc(var(--barline-thickness) * 3); }
 .measure-barline.is-pixel-aligned { background: transparent; }
 .measure-barline.is-pixel-aligned::before,
 .control-boundary.is-pixel-aligned::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: var(--barline-before-left); inline-size: var(--barline-pixel-width); background: #31433d; }
 .measure-barline.is-pixel-aligned.is-double-bar::after,
 .control-boundary.is-pixel-aligned.is-double-bar::after { inset-inline-start: var(--barline-after-left); inline-size: var(--barline-pixel-width); }
+.measure-barline.is-pixel-aligned.is-final-bar::after { inline-size: var(--barline-after-pixel-width); }
 .repeat-dots { position: absolute; inset-block: 0; inline-size: .2em; pointer-events: none; }
 .repeat-dots::before, .repeat-dots::after { content: ""; position: absolute; inline-size: .2em; block-size: .2em; border-radius: 50%; background: #31433d; }
 .repeat-dots::before { inset-block-start: 38%; }

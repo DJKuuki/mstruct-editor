@@ -3,6 +3,8 @@ import { buildLibraryIndex, searchLibrary, renameLibraryAnalysis, validateLibrar
 import { createEmptyMetadata, serializeMstructDocument } from "../core/mstruct-document.js";
 import { serializeSearchVocabulary, deserializeSearchVocabulary } from "../core/profile-search.js";
 import { AUTHORING_APP_VERSION } from "./authoring-version.js";
+import { getEmbeddedMstructProfile } from "./embedded-profile.js";
+import { prepareLibraryMigration } from "../core/library-migration.js";
 
 export function setupDesktopLibrary({ api, profiles, locale, session, onLeave, onOpen, stopPlayback, search, errorMessage }) {
   if (!api?.libraryScan) return null;
@@ -17,6 +19,23 @@ export function setupDesktopLibrary({ api, profiles, locale, session, onLeave, o
     home,
     choose: () => run(async () => { const result = await api.libraryChoose(); if (result.cancelled) return; folder = ""; onLeave(); stopPlayback(); ui.show(); await rescan(); }),
     scan: () => run(() => rescan()), rebuild: () => run(() => rescan(true)),
+    migrate: () => run(async () => {
+      await rescan();
+      const bundled = await getEmbeddedMstructProfile();
+      const available = (await profiles.state()).installed;
+      const identity = await ui.migrationTarget(available, bundled.manifest);
+      if (!identity) return;
+      const target = await profiles.resolve({ ...identity, formatVersion: identity.formatVersion });
+      ui.message("migrationChecking");
+      const plan = await prepareLibraryMigration(snapshot.files, target, AUTHORING_APP_VERSION);
+      if (!await ui.migrationPlan(plan, errorMessage)) { render(); return; }
+      ui.message("migrationWriting");
+      const changes = plan.records.filter(record => record.status === "ready");
+      const result = await api.libraryMigrate({ root: snapshot.root, profile: target, changes });
+      if (result.cancelled) { render(); return; }
+      await rescan(true);
+      ui.message("migrationDone", { count: result.written, backup: result.backup });
+    }),
     search: () => render(), navigate: path => { folder = path; render(); }, parent: () => { folder = folder.includes("/") ? folder.slice(0, folder.lastIndexOf("/")) : ""; render(); },
     open: entry => run(async () => {
       ui.hide();

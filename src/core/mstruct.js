@@ -479,6 +479,7 @@ function createMeasure(index, state) {
     end: index + 1,
     complete: false,
     truncatedByEllipsis: false,
+    finalBar: null,
     duration: rational(0),
     barNumber: state.nextBarNumber,
     explicitBarNumber: false,
@@ -763,6 +764,13 @@ export function parseMstruct(input, options = {}) {
       measure.end = index;
       makeError(errors, source, "measure-unfinished", measure.start, index);
       if (slotHasMusicalEvent(slot) || slotHasAttachedContent(slot) || slot.settings.length) measure.slots.push(slot);
+    }
+    if (measure.finalBar && measure.complete) {
+      const trailingOffset = source.slice(index).search(/\S/);
+      if (trailingOffset >= 0) {
+        makeError(errors, source, "final-bar-content", index + trailingOffset, source.length);
+      }
+      break;
     }
   }
 

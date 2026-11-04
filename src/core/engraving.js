@@ -174,7 +174,8 @@ export function engraveMeasure(measure, { durationDisplayMode = "fraction", loca
       boundaryGuard(beforeMarkers),
       layers.newRiemannian ? newRiemannianLeftOverflow(slot, contentNaturalWidth, contentWidths.chordVisualWidth) : 0,
     );
-    const rightOverflow = Math.max(prefixRightOverflow, boundaryGuard(afterMarkers));
+    const finalBarGuard = measure.finalBar && index === measure.slots.length - 1 ? 14 : 0;
+    const rightOverflow = Math.max(prefixRightOverflow, boundaryGuard(afterMarkers), finalBarGuard);
     const totalNaturalWidth = Math.ceil(contentNaturalWidth + leftOverflow + rightOverflow);
     return {
       slot,

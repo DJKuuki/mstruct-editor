@@ -34,6 +34,7 @@ function setupLibraryIpc({ ipcMain, dialog, shell, userData, window, assertTrust
     async leave() { setPath(null); return { cancelled: false }; },
     async scan() { return (await requireStore()).scan(); },
     async rules() { return (await requireStore()).rules(); },
+    async migrate(value) { return (await requireStore()).migrate(value); },
     async extracted() {
       const library = await requireStore(), snapshot = await library.scan();
       if (snapshot.state.snapshot || Object.keys(snapshot.state.sources).length) return null;
@@ -98,7 +99,7 @@ function setupLibraryIpc({ ipcMain, dialog, shell, userData, window, assertTrust
     },
     async cancel() { pending.clear(); },
   };
-  const guarded = new Set(["choose", "leave", "create", "rename", "trash", "prepare", "apply"]);
+  const guarded = new Set(["choose", "leave", "create", "rename", "trash", "prepare", "apply", "migrate"]);
   for (const [name, action] of Object.entries(operations)) ipcMain.handle(`mstruct-library:${name}`, async (event, value) => {
     assertTrustedSender(event);
     // Save-before-leave must finish its own queued save/cache requests before this action queues.

@@ -13,6 +13,13 @@ test("版本化工具箱 CSV 提供完整本地基线并计算插入后的光标
   assert.ok(config.primaryMenus.length > 0);
   assert.ok(config.events.length > 0);
   assert.ok(config.primaryMenus.some((menu) => menu.secondaryMenus.length > 0));
+  const doubleIndex = config.events.findIndex(event => event.insertion === "{||}");
+  const finalBar = config.events[doubleIndex + 1];
+  assert.equal(finalBar.insertion, "{||END}");
+  assert.equal(finalBar.zhName, "终止小节线");
+  assert.equal(finalBar.enName, "Final Barline");
+  assert.equal(finalBar.primaryId, config.events[doubleIndex].primaryId);
+  assert.equal(finalBar.cursorOffset, "{||END}".length);
   const tonalities = config.primaryMenus.find((menu) => menu.enName === "Tonalities");
   const dtc = config.events.filter((event) => event.primaryId === tonalities.id).at(-1);
   assert.equal(dtc.insertion, "<DTC:>");

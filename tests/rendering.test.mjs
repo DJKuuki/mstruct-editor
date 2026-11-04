@@ -7,7 +7,7 @@ import { renderFullscreenBpm } from "../src/ui/renderer-fullscreen.js";
 import { createSourceEditor } from "../src/ui/source-editor.js";
 import { createEditorWarningSettings } from "../src/ui/editor-warning-settings.js";
 import { createEditorStartupSettings } from "../src/ui/editor-startup-settings.js";
-import { snapScoreBarline } from "../src/ui/score-barlines.js";
+import { snapScoreBarline, alignScoreBarlines } from "../src/ui/score-barlines.js";
 import { createScoreRenderer } from "../src/ui/score-renderer.js";
 import { createScoreFeedback } from "../src/ui/score-feedback.js";
 import { presentationStripGeometry, presentationScrollGeometry, presentationHeightRanges, joinPresentationBoundaries, presentationContentBounds } from "../src/ui/renderer-scroll-strip.js";
@@ -91,6 +91,25 @@ test("strip joins draw a boundary once while retaining repeat sides and mid-meas
 
 const hostedDocumentSource = await readFile(new URL("../src/runtime/hosted-document.js", import.meta.url), "utf8");
 const headerSource = await readFile(new URL("../src/ui/score-document-header.js", import.meta.url), "utf8");
+
+test("final barline pixel alignment preserves a separately snapped thick right stroke", () => {
+  for (const ratio of [1, 1.25, 2]) {
+    const values = new Map();
+    const classes = new Set(['measure-barline', 'is-double-bar', 'is-final-bar']);
+    const boundary = {
+      getBoundingClientRect: () => ({ left: 100.35, width: 2.5 }),
+      classList: { contains: name => classes.has(name), add: name => classes.add(name) },
+      style: { setProperty: (key, value) => values.set(key, value) },
+    };
+    alignScoreBarlines({
+      ownerDocument: { defaultView: { devicePixelRatio: ratio, getComputedStyle: () => ({ fontSize: '20px' }) } },
+      querySelectorAll: () => [boundary],
+    });
+    assert.equal(parseFloat(values.get('--barline-pixel-width')), snapScoreBarline(0, 2.5, ratio).width);
+    assert.equal(parseFloat(values.get('--barline-after-pixel-width')), snapScoreBarline(0, 7.5, ratio).width);
+    assert.ok(classes.has('is-pixel-aligned'));
+  }
+});
 
 test("screen barline edges occupy uniform whole device pixels at fractional zoom", () => {
   for (const ratio of [1, 1.25, 1.5, 2]) {

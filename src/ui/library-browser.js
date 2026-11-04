@@ -12,7 +12,7 @@ export function createLibraryBrowser({ locale, actions }) {
   const toolbar = node("div", undefined, "library-toolbar"), title = node("h2"), controls = {};
   toolbar.append(title);
   const c = (key, values) => libraryCopy(locale(), key, values);
-  for (const key of ["choose", "import", "scan", "rebuild", "folder", "analysis", "status"]) {
+  for (const key of ["choose", "import", "scan", "rebuild", "migrate", "folder", "analysis", "status"]) {
     const control = node("button"); control.type = "button"; controls[key] = control;
     control.addEventListener("click", () => actions[key]?.()); toolbar.append(control);
   }
@@ -107,6 +107,42 @@ export function createLibraryBrowser({ locale, actions }) {
       const { confirm, result } = dialogResult(dialog, "importApply");
       confirm.addEventListener("click", () => { if ([...groups.keys()].every(key => decisions[key])) dialog.close("confirm"); else for (const input of dialog.querySelectorAll("input")) { if (!decisions[input.name]) { input.focus(); break; } } });
       return await result ? decisions : null;
+    },
+    async migrationTarget(profiles, preferred) {
+      const dialog = dialogBase("migrate"), select = node("select"), hash = node("small");
+      select.setAttribute("aria-label", c("migrationTarget"));
+      for (const [index, profile] of profiles.entries()) {
+        const option = node("option", `${profile.profileId} · ${profile.bundleHash.slice(7, 19)}`);
+        option.value = String(index);
+        option.selected = profile.profileId === preferred.profileId && profile.bundleHash === preferred.bundleHash;
+        select.append(option);
+      }
+      const selected = () => profiles[Number(select.value)];
+      const showHash = () => { hash.textContent = selected()?.bundleHash ?? ""; };
+      select.addEventListener("change", showHash); showHash();
+      dialog.append(node("p", c("migrationScope")), node("p", c("migrationTarget")), select, hash);
+      const { confirm, result } = dialogResult(dialog, "migrationReview");
+      confirm.disabled = !profiles.length;
+      confirm.addEventListener("click", () => dialog.close("confirm"));
+      return await result ? selected() : null;
+    },
+    async migrationPlan(plan, errorMessage) {
+      const dialog = dialogBase("migrationReview");
+      const count = status => plan.records.filter(record => record.status === status).length;
+      dialog.append(node("p", `${plan.target.profileId}\n${plan.target.bundleHash}`),
+        node("p", c("migrationSummary", { ready: count("ready"), current: count("current"), errors: count("error") })),
+        node("p", c("migrationBackup")));
+      const list = node("ul");
+      for (const record of plan.records) {
+        const item = node("li", `${record.path} — ${c("migrationStatus_" + record.status)}`);
+        if (record.errors?.[0]) item.append(node("small", errorMessage(record.errors[0])));
+        list.append(item);
+      }
+      dialog.append(list);
+      const { confirm, result } = dialogResult(dialog, "migrationApply");
+      confirm.disabled = count("ready") === 0;
+      confirm.addEventListener("click", () => dialog.close("confirm"));
+      return result;
     },
     async states(state) {
       const dialog = dialogBase("status");

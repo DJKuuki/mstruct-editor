@@ -357,6 +357,7 @@ export function createScoreRenderer({ makeElement, appendChordNotation, appendRo
       const lastSlot = displayedSlots.at(-1)?.slot;
       const boundaryMarkers = [...(lastSlot?.markersAfter ?? []), ...(measure.nextBoundaryMarkers ?? [])];
       decorateControlBoundary(endBar, boundaryMarkers, { showForward: nextMeasureNumber !== null });
+      if (measure.finalBar) endBar.classList.add("is-double-bar", "is-final-bar");
       if (nextMeasureNumber !== null) endBar.append(makeElement("span", "bar-number", String(nextMeasureNumber)));
       measureElement.append(endBar);
     }

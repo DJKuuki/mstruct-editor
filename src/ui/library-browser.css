@@ -31,6 +31,11 @@
 .library-dialog label { display: inline-flex; align-items: center; gap: 8px; margin: 8px 18px 8px 0; }
 .library-dialog details + details { margin-top: 16px; }
 .library-dialog summary { cursor: pointer; overflow-wrap: anywhere; }
+.library-dialog select { display: block; box-sizing: border-box; width: 100%; padding: 8px; color: var(--ink); background: var(--paper); font: inherit; }
+.library-dialog small { display: block; margin-top: 6px; overflow-wrap: anywhere; }
+.library-dialog p, .library-dialog li { overflow-wrap: anywhere; }
+.library-dialog li { margin: 10px 0; }
+.library-dialog button:disabled { opacity: .5; cursor: default; }
 .library-diff { margin-top: 10px; }
 .library-diff-help, .library-diff-missing { margin: 8px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .library-diff-headings, .library-diff-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
