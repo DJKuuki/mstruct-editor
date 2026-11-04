@@ -592,7 +592,7 @@ export function createScoreRenderer({ makeElement, appendChordNotation, appendRo
         : nextRenderedEvent(chart, eventOrder);
       const sourceRows = [...source.querySelectorAll(".score-roman-figures.is-general .score-roman-figure-row")];
       if (!sourceRows.length) continue;
-      const sourceRect = source.getBoundingClientRect();
+      const sourceRect = (source.closest(".event-value-with-annotation") ?? source).getBoundingClientRect();
       const sourceSystem = source.closest(".score-system");
       const sourceMeasure = source.closest(".measure");
       const targetMeasure = target?.closest(".measure");

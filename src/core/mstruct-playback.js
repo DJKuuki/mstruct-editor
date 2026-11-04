@@ -198,8 +198,11 @@ export function buildPlaybackPlan(result, offsetMs = 0) {
   let pendingEllipsis = null;
   let previousChordItems = [];
   let previousRomanItems = [];
+  let formSymbol = null;
 
   for (const [routeIndex, visit] of (result?.playbackRoute ?? []).entries()) {
+    const source = visit.kind === "ellipsis" ? visit.marker : visit.slot;
+    formSymbol = source?.annotations?.form ?? formSymbol;
     if (visit.kind === "ellipsis") {
       const startMs = exactToNumber(elapsed) + normalizedOffset;
       const entry = {
@@ -214,6 +217,7 @@ export function buildPlaybackPlan(result, offsetMs = 0) {
         explicitBpm: visit.explicitBpm ?? null,
         bpmModulated: visit.bpmModulated ?? false,
         timeSignatureLabel: visit.marker.timeSignatureLabel ?? null,
+        formSymbol,
         source: visit.marker,
         formTags: visit.formTags,
         dtcTag: visit.dtcTag,
@@ -253,6 +257,7 @@ export function buildPlaybackPlan(result, offsetMs = 0) {
       explicitBpm: visit.parts.at(-1)?.explicitBpm ?? null,
       bpmModulated: visit.parts.at(-1)?.bpmModulated ?? false,
       timeSignatureLabel: visit.measure.timeSignatureLabel ?? null,
+      formSymbol,
       chordDisplayItems: harmony.chordDisplayItems,
       romanDisplayItems: harmony.romanDisplayItems,
       resolvedChordEvent: harmony.resolvedChordEvent,
@@ -284,9 +289,12 @@ export function buildMstructtimePlaybackPlan(result, timelineDocument, temporary
   let previousChordItems = [];
   let previousRomanItems = [];
   let pianoBreakBefore = false;
+  let formSymbol = null;
 
   for (const row of generated.rows ?? []) {
     if (row.kind === "start") continue;
+    formSymbol = row.source?.annotations?.form ?? formSymbol;
+    row.formSymbol = formSymbol;
     const formTags = projectForms(row.source);
     const dtcTag = projectDtc(row.source);
     let harmony = {
@@ -318,6 +326,7 @@ export function buildMstructtimePlaybackPlan(result, timelineDocument, temporary
       pianoBreakBefore,
       bpm: null,
       timeSignatureLabel: row.timeSignatureLabel ?? row.source?.timeSignatureLabel ?? row.source?.timeSignature ?? null,
+      formSymbol,
       chordDisplayItems: harmony.chordDisplayItems,
       romanDisplayItems: harmony.romanDisplayItems,
       resolvedChordEvent: harmony.resolvedChordEvent,

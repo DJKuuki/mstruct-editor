@@ -1,0 +1,16 @@
+METADATA:
+{MSTRUCT_FORMAT_VERSION}1
+{MSTRUCT_PROFILE_ID}org.mstruct.official/rulesets/1.0.0
+{MSTRUCT_PROFILE_HASH}sha256:4cc19eaa4d4b5f9e0674ee66b048482a2025c996f6c35e71f57d3c768b893881
+{SONG_NAME}全屏曲式延续 / Persistent Fullscreen Form Symbols
+{VERSION_NAME}Renderer Test
+{IS_STABLE_TEMPO}True
+{OFFSET}0
+END_METADATA
+
+MAIN:
+{BN:1}{TS:2/4}{D:1/4}{BPM:1/4=60}C|,C|;
+{||:}[F:A|1|intro]D|,E|;
+[F:B||]F|,G|{:||};
+A|,B|;
+END_MAIN

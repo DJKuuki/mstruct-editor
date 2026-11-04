@@ -228,6 +228,65 @@ test("全屏信息直接携带曲式数据，不依赖谱面图层是否渲染",
   });
 });
 
+test("fullscreen form symbols persist along the repeat route and remain correct after seeking", () => {
+  const parsed = parseMstruct("{BN:1}{TS:2/4}{D:1/4}{BPM:1/4=60}C|,C|;{||:}[F:A|1|intro]D|,E|;[F:B||]F|,G|{:||};A|,B|;", { isStableTempo: true });
+  assert.equal(parsed.ok, true, JSON.stringify(parsed.errors));
+  const plan = buildPlaybackPlan(parsed);
+  const symbols = plan.entries.map(entry => playbackEntryInformation(entry).formSymbol);
+  assert.deepEqual(symbols.map(form => form?.body ?? null), [null, null, "A", "A", "B", "B", "A", "A", "B", "B", "B", "B"]);
+  assert.equal(symbols[3].superscript, "1");
+  assert.equal(symbols[3].subscript, "intro");
+  for (const index of [10, 3, 7, 0, 5]) {
+    assert.equal(playbackEntryInformation(playbackEntryAt(plan, plan.entries[index].startMs)).formSymbol, symbols[index]);
+  }
+  assert.equal(parsed.measures[1].slots[1].annotations.form, null, "inheritance must not add score annotations");
+  assert.equal(playbackEntryInformation(null).formSymbol, null);
+  const fresh = buildPlaybackPlan(parseMstruct("{BN:1}{TS:adlib}{D:1}C|;"));
+  assert.equal(playbackEntryInformation(fresh.entries[0]).formSymbol, null, "new documents start without a form");
+});
+
+test("fullscreen forms cross omissions and unassigned timeline rows until the next symbol", () => {
+  const omitted = parseMstruct("{BN:1}{TS:adlib}{D:1}{BPM:1/4=60}[F:A||]C|;...{BN:2}{T=0:02}D|;[F:B||]E|;F|;");
+  assert.equal(omitted.ok, true, JSON.stringify(omitted.errors));
+  assert.deepEqual(buildPlaybackPlan(omitted).entries.map(entry => playbackEntryInformation(entry).formSymbol?.body), ["A", "A", "A", "B", "B"]);
+
+  const parsed = parseMstruct("{BN:1}{TS:4/4}{D:1/4}C|,[F:A|1|intro]D|,E|,[F:B||]F|;G|,A|,B|,C|;");
+  assert.equal(parsed.ok, true, JSON.stringify(parsed.errors));
+  const timeline = { metadata: { musicLength: "0:08" }, loop: "",
+    main: "{BN:1}{TS:4/4}{D:1/4}[0,1],[,1],[2000,1],[3000,1];{BN:2}[4000,1],[5000,1],[6000,1],[7000,1];" };
+  const plan = buildMstructtimePlaybackPlan(parsed, timeline);
+  assert.equal(plan.ready, true);
+  assert.deepEqual(plan.entries.map(entry => playbackEntryInformation(entry).formSymbol?.body ?? null), [null, "A", "B", "B", "B", "B", "B"]);
+  assert.equal(playbackEntryInformation(playbackEntryAt(plan, 2500)).formSymbol.superscript, "1");
+  assert.equal(playbackEntryInformation(playbackEntryAt(plan, 6500)).formSymbol.body, "B");
+});
+
+test("selecting a timeline row without a timestamp displays its inherited form", t => {
+  class Media extends EventTarget { pause() {} load() {} removeAttribute() {} }
+  const globals = ["CSS", "requestAnimationFrame", "cancelAnimationFrame"];
+  const previous = Object.fromEntries(globals.map(key => [key, globalThis[key]]));
+  globalThis.CSS = { escape: String };
+  globalThis.requestAnimationFrame = () => 1;
+  globalThis.cancelAnimationFrame = () => {};
+  t.after(() => { for (const key of globals) { if (previous[key] === undefined) delete globalThis[key]; else globalThis[key] = previous[key]; } });
+  const result = parseMstruct("{BN:1}{TS:3/4}{D:1/4}C|,[F:A||]D|,E|;[F:B||]F|,G|,A|;");
+  const timeline = { metadata: { musicLength: "0:08" }, loop: "", main: "{BN:1}{TS:3/4}{D:1/4}[0,1],[1000,1],[,1];{BN:2}[2000,1],[,1],[5000,1];" };
+  const plan = buildMstructtimePlaybackPlan(result, timeline);
+  assert.equal(plan.ready, true);
+  const rows = plan.rows.filter(row => row.kind === "event" && row.milliseconds === null);
+  assert.deepEqual(rows.map(row => row.formSymbol?.body), ["A", "B"]);
+  const canvas = { classList: { add() {}, remove() {}, toggle() {} }, addEventListener() {}, removeEventListener() {}, querySelector: () => null };
+  let currentEntry;
+  const player = createRendererPlayback({ canvas, mediaElement: new Media(), onStateChange(state, entry) { currentEntry = entry; }, requestScroll() {}, closePopovers() {} });
+  t.after(() => player.destroy());
+  player.setDocument({ result, stableTempo: false, userOffset: 0 });
+  player.setTimelineDocument(timeline);
+  for (const row of [rows[1], rows[0]]) {
+    player.selectTimelineRow(row.number);
+    assert.equal(playbackEntryInformation(currentEntry).formSymbol.body, row.formSymbol.body);
+  }
+});
+
 test("延长符按实际播放路线分别回读前一和弦与 Roman", () => {
   const result = parseMstruct(
     "{BN:1}{TS:4/4}{D:1/4}{BPM:1/4=120}{TC:C}C|I,[C:-|R:V],[C:D|R:-],-;",

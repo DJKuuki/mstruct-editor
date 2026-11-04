@@ -660,6 +660,7 @@ export function createRendererPlayback({ canvas, onStateChange, requestScroll, c
       position: `${row.measure} ${row.beat}`,
       midiNotes: null,
       timeSignatureLabel: row.timeSignatureLabel ?? row.source?.timeSignatureLabel ?? row.source?.timeSignature ?? null,
+      formSymbol: row.formSymbol ?? null,
       chordDisplayItems: [],
       romanDisplayItems: [],
       resolvedChordEvent: null,

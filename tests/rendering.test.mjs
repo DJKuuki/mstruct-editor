@@ -729,6 +729,64 @@ test("BPM 拍单位复用时值音符规则，连音数字可读且新里曼弧�
   assert.match(stylesheet, /@media \(max-width: 1000px\)[\s\S]*\.renderer-nav \{[^}]*z-index:\s*10/s);
 });
 
+test("figured-bass lines start after the complete annotation in each Roman row", (t) => {
+  const previousStyle = globalThis.getComputedStyle;
+  const previousCss = globalThis.CSS;
+  globalThis.getComputedStyle = () => ({ fontSize: "16px" });
+  globalThis.CSS = { escape: value => value };
+  t.after(() => {
+    if (previousStyle === undefined) delete globalThis.getComputedStyle;
+    else globalThis.getComputedStyle = previousStyle;
+    if (previousCss === undefined) delete globalThis.CSS;
+    else globalThis.CSS = previousCss;
+  });
+  const box = (left, right, top = 20, height = 8) => ({ left, right, top, height, bottom: top + height });
+  const node = rect => ({ getBoundingClientRect: () => rect });
+  const { drawRomanVoiceLeadingLines } = createScoreRenderer({
+    makeElement: (tag, className) => ({ className, style: {}, children: [], setAttribute() {}, append(child) { this.children.push(child); } }),
+  });
+  for (const mode of ["same-system", "next-system", "break"]) {
+    for (const annotationRight of [null, 180, 260]) {
+      const system = { ...node(box(0, 500)), querySelectorAll: () => [node(box(300, 302))] };
+      const nextSystem = { ...node(box(0, 500, 200)), querySelectorAll: () => [] };
+      const measure = { ...node(box(0, 500)), querySelector: () => node(box(490, 492)) };
+      const sourceRows = [node(box(110, 120, 20)), node(box(110, 120, 32))];
+      const targetLeft = mode === "next-system" ? 200 : 400;
+      const targetTop = mode === "next-system" ? 220 : 20;
+      const source = {
+        ...node(box(100, 120, 18, 24)),
+        dataset: { romanChainLink: mode === "break" ? "break" : "continue", romanChainId: "1", romanChainIndex: "0", eventOrder: "1" },
+        querySelectorAll: () => sourceRows,
+        closest: selector => selector === ".event-value-with-annotation" ? (annotationRight ? node(box(100, annotationRight)) : null)
+          : selector === ".score-system" ? system : measure,
+      };
+      const target = {
+        ...node(box(targetLeft, targetLeft + 10, targetTop)), dataset: { eventOrder: "2" },
+        querySelectorAll: () => [node(box(targetLeft, targetLeft + 10, targetTop)), node(box(targetLeft, targetLeft + 10, targetTop + 12))],
+        closest: selector => selector === ".score-system" ? (mode === "next-system" ? nextSystem : system) : measure,
+      };
+      const chart = {
+        ...node(box(10, 510, 5)),
+        querySelector: selector => selector === ".roman-voice-leading-layer" ? null : target,
+        querySelectorAll: selector => selector === "[data-event-order]" ? [source, target] : [source],
+        append(layer) { this.layer = layer; },
+      };
+      drawRomanVoiceLeadingLines(chart);
+      const segments = chart.layer.children.filter(child => child.className === "roman-voice-leading-segment");
+      for (const rowTop of [19, 31]) {
+        const rowSegments = segments.filter(segment => Number.parseFloat(segment.style.top) === rowTop);
+        assert.ok(rowSegments.length, `${mode}: both figure rows retain their lines`);
+        assert.equal(Number.parseFloat(rowSegments[0].style.left), (annotationRight ?? 120) + 16 * .7 - 10,
+          `${mode}: line clears the closing annotation parenthesis`);
+        assert.ok(rowSegments.every(segment => Number.parseFloat(segment.style.width) > 0));
+      }
+      if (mode === "next-system") assert.equal(segments.filter(segment => Number.parseFloat(segment.style.top) > 200).length, 2);
+      const cuts = chart.layer.children.filter(child => child.className === "roman-voice-leading-cut");
+      assert.equal(cuts.length, mode === "break" ? 2 : 0);
+    }
+  }
+});
+
 test("罗马数字使用独立的上下标、详情弹层与跨小节 voice-leading 线", () => {
   assert.match(rendererSource, /function makeRomanSymbol/);
   assert.match(rendererSource, /openRomanPopover/);

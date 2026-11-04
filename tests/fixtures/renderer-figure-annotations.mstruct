@@ -1,0 +1,17 @@
+METADATA:
+{MSTRUCT_FORMAT_VERSION}1
+{MSTRUCT_PROFILE_ID}org.mstruct.official/rulesets/1.0.0
+{MSTRUCT_PROFILE_HASH}sha256:4cc19eaa4d4b5f9e0674ee66b048482a2025c996f6c35e71f57d3c768b893881
+{SONG_NAME}数字低音连线与注释 / Figured-bass Lines and Annotations
+{VERSION_NAME}Renderer Test
+{IS_STABLE_TEMPO}False
+{OFFSET}0
+END_METADATA
+
+MAIN:
+{BN:1}{TS:adlib}{D:1/2}{TC:C}Gsus2\\Gadd2|V[5,2-]\\V,G|[5,3];{LB}
+Gsus2|V[5,2-],G|[5,3];{LB}
+Gsus2|V[5,2-]\\V7sus;G|[5,3];{LB}
+Gsus2|V[5,2-]\\V7sus;{LB}G|[5,3];{LB}
+Gsus2|V[5,2-x]\\V,G|V;
+END_MAIN

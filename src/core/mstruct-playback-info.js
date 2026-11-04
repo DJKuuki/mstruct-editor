@@ -53,7 +53,7 @@ export function playbackEntryInformation(entry, {
     bpm: entry?.bpm ?? null,
     bpmReference: entry?.bpmModulated ? referenceBpmValue(entry?.bpm, entry?.explicitBpm) : null,
     timeSignatureLabel: entry?.timeSignatureLabel ?? null,
-    formSymbol: source?.annotations?.form ?? null,
+    formSymbol: entry?.formSymbol ?? source?.annotations?.form ?? null,
     activeTags: currentTags(source, entry?.formTags, entry?.dtcTag, entry?.globalTags),
     comment: commentNumber === null ? null : commentText(comments, commentNumber, locale),
     chordEvent,
