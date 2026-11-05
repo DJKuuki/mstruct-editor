@@ -10,6 +10,7 @@ import { parseRomanConfigCsv } from "../src/core/roman-symbol.js";
 import { parseSemanticTagConfigCsv } from "../src/core/semantic-tags.js";
 import { parseTagConfigCsv } from "../src/core/tag-config.js";
 import { parseFormTagConfigCsv } from "../src/core/form-tag-config.js";
+import { tonalReferencePitchClass } from "../src/core/tonal-reference.js";
 const formTagConfig = parseFormTagConfigCsv(await readFile(new URL("../src/config/form-tags.csv", import.meta.url), "utf8"));
 
 const [specialChordCsv, romanBasicCsv, romanAdvancedCsv, romanFiguredBassCsv, romanSpecialCsv, tagCsv, cadenceTagCsv, tonalTagCsv, sequenceTagCsv, k545DocumentSource] = await Promise.all([
@@ -107,9 +108,36 @@ test("K545 文档是独立编辑器的有效启动测试用例", () => {
   assert.equal(result.ok, true, result.errors.map((error) => error.message).join("\n"));
   assert.ok(result.measures.length >= 13);
   const measure11 = result.measures.find((measure) => measure.barNumber === 11);
-  assert.deepEqual(measure11?.slots[1].events[0].romanLayers.map((layer) => layer.roman), ["[6,4-]", "I64"]);
+  assert.deepEqual(measure11?.slots[1].events[0].romanLayers.map((layer) => layer.roman), ["[6,4-]", "IV64"]);
   assert.deepEqual(measure11?.slots[0].events[0].romanLayers.map((layer) => [layer.romanResult.baseText, layer.romanFigureChain?.index]), [["V", 0], ["I", undefined]]);
-  assert.deepEqual(measure11?.slots[1].events[0].romanLayers.map((layer) => [layer.romanResult.baseText, layer.romanFigureChain?.index]), [["", 1], ["I", undefined]]);
+  assert.deepEqual(measure11?.slots[1].events[0].romanLayers.map((layer) => [layer.romanResult.baseText, layer.romanFigureChain?.index]), [["", 1], ["IV", undefined]]);
+});
+
+test("K545 示例的和弦记号与罗马级数指向同一和声", () => {
+  // The compiler checks chord and Roman fields independently, so the startup example guards their agreement here.
+  const result = parseMstruct(parseMstructDocument(k545DocumentSource).main, { specialChords, romanConfig, tagConfig, semanticTagConfig, formTagConfig });
+  assert.equal(result.ok, true, result.errors.map((error) => error.message).join("\n"));
+  const degreeSemitones = [0, 2, 4, 5, 7, 9, 11];
+  const accidentalOffsets = { "": 0, b: -1, bb: -2, "#": 1, x: 2 };
+  const mismatches = [];
+  let checked = 0;
+  for (const measure of result.measures) for (const slot of measure.slots) for (const event of slot.events) {
+    const chordPitches = event.chordResult?.structure.toMidiNotes().map((note) => note % 12);
+    if (!chordPitches) continue;
+    for (const layer of event.romanLayers ?? [event]) {
+      for (const roman of [layer.romanResult, layer.romanAnnotationResult]) {
+        if (!roman?.structure) continue;
+        const tonic = tonalReferencePitchClass(layer.tonalCenter ?? event.tonalCenter);
+        const romanPitches = roman.structure.items.map((item) => (tonic + degreeSemitones[item.degree - 1] + accidentalOffsets[item.accidental] + 12) % 12);
+        checked += 1;
+        if (romanPitches[0] !== chordPitches[0] || romanPitches.some((pitch) => !chordPitches.includes(pitch))) {
+          mismatches.push(`m${measure.barNumber} ${event.chord}|${roman.source ?? layer.roman}`);
+        }
+      }
+    }
+  }
+  assert.ok(checked > 100, `only ${checked} chord/Roman pairs were checked`);
+  assert.deepEqual(mismatches, []);
 });
 
 test("NR 回归覆盖同小节、跨小节、延长符来源和强制跨 system", () => {
